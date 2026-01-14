@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promo Bilie - Ofertas por Tempo Limitado</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos básicos para garantir que a página fique apresentável mesmo se o CSS externo não carregar */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: #000;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .stores {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .store {
+            background: #f1f3f4;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: #444;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #0088cc; /* Cor do Telegram */
+            color: white;
+            padding: 18px 40px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 20px 0;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,136,204,0.3);
+        }
+        .cta-button:hover {
+            background: #0077b5;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,136,204,0.4);
+        }
+        .cta-button i {
+            margin-right: 10px;
+        }
+        .note {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 30px;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 20px;
+        }
+        .benefit {
+            background: #f8f9fa;
+            border-left: 5px solid #0088cc;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 0 10px 10px 0;
+        }
+        .benefit h3 {
+            margin-top: 0;
+            color: #0088cc;
+        }
+        .warning {
+            color: #ff6600;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Promo Bilie</div>
+        <h1>OFERTAS POR TEMPO LIMITADO!</h1>
+        <p class="subtitle">Cupons, descontos e promoções em um só lugar</p>
+        
+        <div class="benefit">
+            <h3><i class="fas fa-bolt"></i> Economize na Black Friday</h3>
+            <p>Receba as melhores ofertas antes de todo mundo, com descontos de até 90%.</p>
+        </div>
+        
+        <div class="stores">
+            <div class="store">AMAZON</div>
+            <div class="store">MERCADO LIVRE</div>
+            <div class="store">SHOPEE</div>
+            <div class="store">E MAIS</div>
+        </div>
+        
+        <p><strong>Clique no botão abaixo para entrar no grupo VIP do Telegram e acessar todas as ofertas:</strong></p>
+        
+        <a href="https://t.me/promobilie" class="cta-button" target="_blank">
+            <i class="fab fa-telegram"></i> ENTRAR NO GRUPO AGORA
+        </a>
+        
+        <p class="warning">⚠️ Acesso restrito por tempo limitado. Vagas podem se esgotar.</p>
+        
+        <p class="note">
+            Ao entrar, você concorda em receber notificações de ofertas.<br>
+            Não enviamos spam. Só promoções selecionadas.
+        </p>
+    </div>
+
+    <script>
+        // Redirecionamento opcional após 10 segundos (pode remover se não quiser)
+        setTimeout(function() {
+            if (confirm('Você está sendo redirecionado para o grupo do Telegram. Clique em "OK" para ir agora.')) {
+                window.location.href = 'https://t.me/seucanal';
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
