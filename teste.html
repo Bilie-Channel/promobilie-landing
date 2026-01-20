@@ -6,11 +6,10 @@
     <title>Promobilie - Ofertas Exclusivas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Reset e variáveis */
         :root {
-            --primary: #25D366; /* Verde WhatsApp */
-            --secondary: #0088CC; /* Azul Telegram */
-            --accent: #1877F2; /* Azul Facebook */
+            --primary: #25D366;
+            --secondary: #0088CC;
+            --accent: #1877F2;
             --dark: #333333;
             --light: #f8f9fa;
             --gray: #6c757d;
@@ -40,7 +39,6 @@
             padding: 0 20px;
         }
         
-        /* Header */
         header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
@@ -82,7 +80,6 @@
             z-index: 1;
         }
         
-        /* Seção de Redes Sociais */
         .social-section {
             padding: 40px 0;
             text-align: center;
@@ -202,7 +199,6 @@
             transform: scale(1.05);
         }
         
-        /* Seção de últimas ofertas */
         .offers-section {
             padding: 40px 0 60px;
             background-color: white;
@@ -297,7 +293,6 @@
             transform: translateX(5px);
         }
         
-        /* Loading e estados vazios */
         .loading, .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -325,13 +320,11 @@
             opacity: 0.5;
         }
         
-        /* Botão de atualização */
         .refresh-btn-container {
             text-align: center;
             margin-top: 30px;
         }
         
-        /* Footer */
         footer {
             background-color: var(--dark);
             color: white;
@@ -356,7 +349,6 @@
             margin-top: 15px;
         }
         
-        /* Responsividade */
         @media (max-width: 768px) {
             .social-grid {
                 grid-template-columns: 1fr;
@@ -387,6 +379,34 @@
             .offer-card {
                 margin-bottom: 20px;
             }
+        }
+        
+        .method-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .method-btn {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .method-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .method-btn:hover:not(.active) {
+            background: #e9ecef;
         }
     </style>
 </head>
@@ -457,14 +477,30 @@
                 Confira as últimas ofertas publicadas no nosso canal do Telegram. Atualizamos diariamente com novas promoções!
             </p>
             
+            <!-- Seletor de Método -->
+            <div class="method-selector">
+                <button class="method-btn active" onclick="setMethod('scraping')" id="btn-scraping">
+                    <i class="fas fa-globe"></i> Método Web (Recomendado)
+                </button>
+                <button class="method-btn" onclick="setMethod('api')" id="btn-api">
+                    <i class="fas fa-code"></i> Método API (Bot)
+                </button>
+                <button class="method-btn" onclick="setMethod('sample')" id="btn-sample">
+                    <i class="fas fa-eye"></i> Ver Exemplo
+                </button>
+            </div>
+            
             <div class="offers-grid" id="offers-container">
-                <!-- Ofertas serão carregadas via API -->
+                <!-- Ofertas serão carregadas aqui -->
             </div>
             
             <div class="refresh-btn-container">
-                <button onclick="loadTelegramOffers()" class="btn btn-telegram" id="refresh-btn">
-                    <i class="fas fa-sync-alt"></i> Atualizar Ofertas
+                <button onclick="loadOffers()" class="btn btn-telegram" id="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Carregar Ofertas
                 </button>
+                <p style="margin-top: 10px; font-size: 0.9em; color: var(--gray);">
+                    Método atual: <span id="current-method">Web Scraping</span>
+                </p>
             </div>
         </div>
     </section>
@@ -494,23 +530,41 @@
             document.getElementById('facebook-link').href = 'https://facebook.com/sua-pagina-aqui';
             
             // Carregar ofertas ao iniciar
-            loadTelegramOffers();
+            loadOffers();
         });
         
-        // Configuração - ALTERE AQUI
+        // Configurações
         const config = {
-            // URL do seu backend (será explicado abaixo)
-            apiUrl: 'https://seu-backend.vercel.app/api/telegram-messages',
-            
-            // Nome do seu canal no Telegram (com @)
-            channelName: '@promobilie',
-            
-            // Quantidade de mensagens a buscar
-            limit: 6
+            telegramChannel: 'promobilie',
+            limit: 6,
+            currentMethod: 'scraping', // 'scraping', 'api', ou 'sample'
+            telegramBotToken: '7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI' // Para método API
         };
         
-        // Função principal para carregar ofertas do Telegram
-        async function loadTelegramOffers() {
+        // Função para definir o método
+        function setMethod(method) {
+            config.currentMethod = method;
+            
+            // Atualizar botões
+            document.getElementById('btn-scraping').classList.remove('active');
+            document.getElementById('btn-api').classList.remove('active');
+            document.getElementById('btn-sample').classList.remove('active');
+            document.getElementById(`btn-${method}`).classList.add('active');
+            
+            // Atualizar texto
+            const methodNames = {
+                scraping: 'Web Scraping',
+                api: 'API do Telegram',
+                sample: 'Exemplo'
+            };
+            document.getElementById('current-method').textContent = methodNames[method];
+            
+            // Recarregar ofertas
+            loadOffers();
+        }
+        
+        // Função principal para carregar ofertas
+        async function loadOffers() {
             const container = document.getElementById('offers-container');
             const refreshBtn = document.getElementById('refresh-btn');
             
@@ -518,43 +572,313 @@
             container.innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Conectando ao Telegram...</p>
+                    <p>Carregando ofertas via ${config.currentMethod === 'scraping' ? 'Web Scraping' : config.currentMethod === 'api' ? 'API do Telegram' : 'Exemplo'}...</p>
                 </div>
             `;
             
             // Desabilitar botão durante o carregamento
             refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando ofertas...';
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
             
             try {
-                // Fazer requisição para o backend
-                const response = await fetch(`${config.apiUrl}?channel=${config.channelName}&limit=${config.limit}`);
+                let messages = [];
                 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Erro ao buscar ofertas');
+                switch(config.currentMethod) {
+                    case 'scraping':
+                        messages = await loadViaWebScraping();
+                        break;
+                    case 'api':
+                        messages = await loadViaTelegramAPI();
+                        break;
+                    case 'sample':
+                        messages = getSampleMessages();
+                        break;
                 }
                 
-                const data = await response.json();
-                
-                // Verificar se há mensagens
-                if (data.messages && data.messages.length > 0) {
-                    renderOffers(data.messages);
+                if (messages && messages.length > 0) {
+                    renderOffers(messages.slice(0, config.limit));
                 } else {
                     showNoOffers();
                 }
                 
             } catch (error) {
-                console.error('Erro:', error);
+                console.error('Erro ao carregar ofertas:', error);
                 showError(error.message);
             } finally {
                 // Reabilitar botão
                 refreshBtn.disabled = false;
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Ofertas';
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Carregar Ofertas';
             }
         }
         
-        // Função para renderizar ofertas
+        // =============================================
+        // MÉTODO 1: WEB SCRAPING (RECOMENDADO)
+        // =============================================
+        async function loadViaWebScraping() {
+            try {
+                // URL do canal no Telegram Web
+                const telegramWebUrl = `https://t.me/s/${config.telegramChannel}`;
+                
+                // Usar um proxy CORS para acessar o Telegram
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(telegramWebUrl);
+                
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const htmlContent = data.contents;
+                
+                // Analisar o HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                
+                // Encontrar todas as mensagens
+                const messageElements = doc.querySelectorAll('.tgme_widget_message:not(.service_message)');
+                
+                if (messageElements.length === 0) {
+                    throw new Error('Nenhuma mensagem encontrada no canal');
+                }
+                
+                const messages = [];
+                
+                messageElements.forEach((element, index) => {
+                    // Extrair texto da mensagem
+                    const textElement = element.querySelector('.tgme_widget_message_text');
+                    const text = textElement ? textElement.textContent.trim() : '';
+                    
+                    if (!text) return; // Pular mensagens sem texto
+                    
+                    // Extrair data/hora
+                    const timeElement = element.querySelector('.tgme_widget_message_date time');
+                    const datetime = timeElement ? timeElement.getAttribute('datetime') : '';
+                    
+                    // Extrair link da mensagem
+                    const linkElement = element.querySelector('.tgme_widget_message_date');
+                    const link = linkElement ? linkElement.href : `https://t.me/${config.telegramChannel}/${index + 1}`;
+                    
+                    // Extrair imagem (se houver)
+                    let imageUrl = '';
+                    const photoElement = element.querySelector('.tgme_widget_message_photo_wrap');
+                    if (photoElement) {
+                        const style = photoElement.getAttribute('style');
+                        const match = style.match(/background-image:url\('(.+?)'\)/);
+                        if (match) {
+                            imageUrl = match[1];
+                        }
+                    }
+                    
+                    // Formatar data
+                    let formattedDate = 'Data não disponível';
+                    if (datetime) {
+                        try {
+                            const dateObj = new Date(datetime);
+                            formattedDate = dateObj.toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } catch (e) {
+                            formattedDate = datetime;
+                        }
+                    }
+                    
+                    messages.push({
+                        id: index + 1,
+                        text: text,
+                        date: formattedDate,
+                        rawDate: datetime,
+                        link: link,
+                        imageUrl: imageUrl,
+                        hasImage: !!imageUrl
+                    });
+                });
+                
+                // Ordenar por data (mais recente primeiro)
+                messages.sort((a, b) => {
+                    if (!a.rawDate || !b.rawDate) return 0;
+                    return new Date(b.rawDate) - new Date(a.rawDate);
+                });
+                
+                return messages;
+                
+            } catch (error) {
+                console.error('Erro no web scraping:', error);
+                throw new Error(`Falha no web scraping: ${error.message}`);
+            }
+        }
+        
+        // =============================================
+        // MÉTODO 2: API DO TELEGRAM (BOT)
+        // =============================================
+        async function loadViaTelegramAPI() {
+            if (config.telegramBotToken === 'SEU_TOKEN_AQUI') {
+                throw new Error('Configure o token do bot primeiro');
+            }
+            
+            try {
+                // Método 1: Tentar getUpdates primeiro
+                let apiUrl = `https://api.telegram.org/bot${config.telegramBotToken}/getUpdates`;
+                apiUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.ok) {
+                    throw new Error(data.description || 'Erro na API do Telegram');
+                }
+                
+                // Processar mensagens
+                const messages = [];
+                const updates = data.result || [];
+                
+                // Filtrar apenas mensagens do canal
+                updates.forEach(update => {
+                    const channelPost = update.channel_post;
+                    
+                    if (channelPost && channelPost.chat && 
+                        channelPost.chat.username === config.telegramChannel) {
+                        
+                        const text = channelPost.text || channelPost.caption || '';
+                        
+                        if (text) {
+                            const date = new Date(channelPost.date * 1000);
+                            const formattedDate = date.toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            
+                            const messageId = channelPost.message_id;
+                            const link = `https://t.me/${config.telegramChannel}/${messageId}`;
+                            
+                            messages.push({
+                                id: messageId,
+                                text: text,
+                                date: formattedDate,
+                                rawDate: channelPost.date,
+                                link: link,
+                                hasImage: !!(channelPost.photo || channelPost.document)
+                            });
+                        }
+                    }
+                });
+                
+                // Ordenar por data (mais recente primeiro)
+                messages.sort((a, b) => b.rawDate - a.rawDate);
+                
+                if (messages.length === 0) {
+                    throw new Error('O bot não tem acesso ao histórico do canal');
+                }
+                
+                return messages;
+                
+            } catch (error) {
+                console.error('Erro na API do Telegram:', error);
+                throw new Error(`API do Telegram: ${error.message}`);
+            }
+        }
+        
+        // =============================================
+        // MÉTODO 3: MENSAGENS DE EXEMPLO
+        // =============================================
+        function getSampleMessages() {
+            return [
+                {
+                    id: 1,
+                    text: "🔥 OFERTA RELÂMPAGO: Smartphone Xiaomi com 45% OFF! Modelo topo de linha, 8GB RAM, 256GB. Apenas R$ 1.299 à vista. Corre que é por tempo limitado! 📱",
+                    date: new Date().toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    link: "https://t.me/promobilie",
+                    hasImage: true
+                },
+                {
+                    id: 2,
+                    text: "🎮 PROMOÇÃO: PlayStation 5 + Controle Extra + 3 Jogos Digitais por apenas R$ 3.799! Entrega grátis para todo Brasil. Estoque limitado!",
+                    date: new Date(Date.now() - 3600000).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    link: "https://t.me/promobilie",
+                    hasImage: true
+                },
+                {
+                    id: 3,
+                    text: "💻 NOTEBOOK GAMER: Acer Nitro 5 com RTX 3050, i7, 16GB RAM por R$ 4.199! Apenas 8 unidades disponíveis. Não perca essa chance!",
+                    date: new Date(Date.now() - 7200000).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    link: "https://t.me/promobilie",
+                    hasImage: false
+                },
+                {
+                    id: 4,
+                    text: "🛒 SUPERMERCADO: Cupom 35% OFF em compras acima de R$ 250! Use o código: PROMOBILIE35. Válido até amanhã à meia-noite!",
+                    date: new Date(Date.now() - 10800000).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    link: "https://t.me/promobilie",
+                    hasImage: false
+                },
+                {
+                    id: 5,
+                    text: "✈️ VIAGEM: Passagens aéreas com 65% OFF para Florianópolis, Rio e Bahia! Promoção válida para embarque até dezembro. Reserve já!",
+                    date: new Date(Date.now() - 14400000).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    link: "https://t.me/promobilie",
+                    hasImage: true
+                },
+                {
+                    id: 6,
+                    text: "🏠 ELETRODOMÉSTICOS: Geladeira French Door 520L por R$ 2.899! 12x sem juros + frete grátis + 2 anos de garantia. Oferta especial!",
+                    date: new Date(Date.now() - 18000000).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    link: "https://t.me/promobilie",
+                    hasImage: true
+                }
+            ];
+        }
+        
+        // =============================================
+        // FUNÇÃO PARA RENDERIZAR OFERTAS
+        // =============================================
         function renderOffers(messages) {
             const container = document.getElementById('offers-container');
             
@@ -566,48 +890,27 @@
             let offersHTML = '';
             
             messages.forEach(message => {
-                // Extrair informações da mensagem
-                const text = message.text || message.caption || '';
-                const date = message.date ? new Date(message.date * 1000) : new Date();
-                const photos = message.photos || [];
-                const messageId = message.id;
-                const link = `https://t.me/promobilie/${messageId}`;
+                const title = message.text.length > 80 ? message.text.substring(0, 80) + '...' : message.text;
+                const description = message.text.length > 150 ? message.text.substring(0, 150) + '...' : message.text;
                 
-                // Extrair imagem (se houver)
-                let imageUrl = '';
-                if (photos.length > 0) {
-                    // Pegar a maior foto disponível
-                    const photo = photos[photos.length - 1];
-                    imageUrl = getPhotoUrl(photo);
-                }
-                
-                // Formatar data
-                const formattedDate = date.toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                // Criar título a partir do texto
-                const title = text.length > 80 ? text.substring(0, 80) + '...' : text;
-                const description = text.length > 150 ? text.substring(0, 150) + '...' : text;
+                // Detectar emoji para imagem padrão
+                const emojiMatch = message.text.match(/[\p{Emoji}]/u);
+                const defaultEmoji = emojiMatch ? emojiMatch[0] : '🎁';
                 
                 offersHTML += `
                     <div class="offer-card">
-                        ${imageUrl ? 
-                            `<img src="${imageUrl}" alt="${title}" class="offer-image" loading="lazy">` : 
-                            `<div class="default-image"><i class="fas fa-gift"></i></div>`
+                        ${message.imageUrl ? 
+                            `<img src="${message.imageUrl}" alt="${title}" class="offer-image" loading="lazy">` : 
+                            `<div class="default-image" style="font-size: 4rem;">${defaultEmoji}</div>`
                         }
                         <div class="offer-content">
                             <div class="offer-date">
-                                <i class="far fa-calendar-alt"></i> ${formattedDate}
+                                <i class="far fa-calendar-alt"></i> ${message.date}
                             </div>
                             <h3 class="offer-title">${title}</h3>
                             <p class="offer-description">${description}</p>
-                            <a href="${link}" target="_blank" class="offer-link">
-                                Ver oferta completa <i class="fas fa-arrow-right"></i>
+                            <a href="${message.link}" target="_blank" class="offer-link">
+                                Ver oferta no Telegram <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                     </div>
@@ -617,33 +920,21 @@
             container.innerHTML = offersHTML;
         }
         
-        // Função auxiliar para obter URL da foto
-        function getPhotoUrl(photo) {
-            // Na API do Telegram, as fotos têm múltiplos tamanhos
-            // Vamos pegar o tamanho com maior qualidade disponível
-            if (photo.sizes && photo.sizes.length > 0) {
-                // Ordenar por tamanho (maior primeiro)
-                const sortedSizes = [...photo.sizes].sort((a, b) => 
-                    (b.w * b.h) - (a.w * a.h)
-                );
-                // Pegar a maior
-                const largestSize = sortedSizes[0];
-                // O file_id pode ser usado para baixar a foto via API
-                // Para simplificar, vamos usar uma imagem de placeholder
-                // No backend real, você converterá file_id para URL
-                return `https://via.placeholder.com/400x200/0088cc/ffffff?text=Oferta+Promobilie`;
-            }
-            return '';
-        }
-        
-        // Funções para estados de erro/vazio
+        // =============================================
+        // FUNÇÕES PARA ESTADOS DE ERRO/VAZIO
+        // =============================================
         function showNoOffers() {
             const container = document.getElementById('offers-container');
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-inbox"></i>
                     <h3>Nenhuma oferta encontrada</h3>
-                    <p>O canal ainda não possui mensagens públicas ou ocorreu um erro na conexão.</p>
+                    <p>Tente mudar o método de carregamento ou verifique se o canal está público.</p>
+                    <div style="margin-top: 20px;">
+                        <a href="https://t.me/${config.telegramChannel}" target="_blank" class="btn btn-telegram">
+                            <i class="fab fa-telegram"></i> Acessar Canal Diretamente
+                        </a>
+                    </div>
                 </div>
             `;
         }
@@ -654,12 +945,15 @@
                 <div class="empty-state">
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Erro ao carregar ofertas</h3>
-                    <p>${message || 'Não foi possível conectar ao Telegram.'}</p>
-                    <p style="margin-top: 10px; font-size: 0.9em;">
-                        <a href="https://t.me/promobilie" target="_blank" style="color: var(--secondary);">
-                            <i class="fab fa-telegram"></i> Acesse o canal diretamente
-                        </a>
-                    </p>
+                    <p>${message || 'Ocorreu um erro inesperado.'}</p>
+                    <div style="margin-top: 20px;">
+                        <p><strong>Tente:</strong></p>
+                        <ol style="text-align: left; max-width: 500px; margin: 10px auto;">
+                            <li>Usar o método "Web Scraping" (recomendado)</li>
+                            <li>Verificar se o canal é público</li>
+                            <li>Recarregar a página</li>
+                        </ol>
+                    </div>
                 </div>
             `;
         }
