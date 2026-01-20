@@ -153,7 +153,7 @@
     <script>
         // Configurações
         const TELEGRAM_BOT_TOKEN = '7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI';
-        const TELEGRAM_CHANNEL_USERNAME = 'promobilie'; // Sem o @
+        const TELEGRAM_CHANNEL_USERNAME = 'promobilie'; // Usaremos apenas para gerar links
         
         // Elementos do DOM
         const connectionStatus = document.getElementById('connection-status');
@@ -164,8 +164,8 @@
             try {
                 connectionStatus.innerHTML = '<i class="fas fa-circle animate-pulse mr-1"></i>Buscando últimas ofertas...';
                 
-                // Primeiro, vamos buscar as atualizações recentes do bot
-                const updatesUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=-100&limit=100`;
+                // Buscar as atualizações recentes do bot - sem offset para pegar as mais recentes
+                const updatesUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=100`;
                 
                 const response = await fetch(updatesUrl);
                 
@@ -179,13 +179,14 @@
                     throw new Error('Resposta inválida da API do Telegram');
                 }
                 
-                // Filtrar apenas mensagens do canal @promobilie
+                console.log('Total de updates:', data.result.length); // Para debug
+                
+                // Filtrar apenas mensagens de canal (channel_post) que tenham conteúdo
                 const channelMessages = data.result
                     .filter(update => {
                         const channelPost = update.channel_post;
+                        // Verificar se é uma mensagem de canal com conteúdo
                         return channelPost && 
-                               channelPost.chat && 
-                               channelPost.chat.username === TELEGRAM_CHANNEL_USERNAME &&
                                (channelPost.text || channelPost.caption);
                     })
                     .map(update => {
@@ -193,14 +194,17 @@
                         return {
                             text: post.text || post.caption || '',
                             date: post.date * 1000,
-                            message_id: post.message_id
+                            message_id: post.message_id,
+                            chat_id: post.chat ? post.chat.id : null
                         };
                     })
                     .sort((a, b) => b.date - a.date) // Ordenar do mais recente para o mais antigo
                     .slice(0, 6); // Pegar apenas as 6 mais recentes
                 
+                console.log('Mensagens de canal encontradas:', channelMessages.length); // Para debug
+                
                 if (channelMessages.length === 0) {
-                    throw new Error('Nenhuma mensagem encontrada no canal');
+                    throw new Error('Nenhuma mensagem de canal encontrada');
                 }
                 
                 // Processar as mensagens para extrair informações das ofertas
@@ -210,7 +214,7 @@
                 renderOffers(offers);
                 
                 connectionStatus.innerHTML = '<i class="fas fa-circle text-green-400 mr-1"></i>' + 
-                    `${offers.length} ofertas carregadas do canal @promobilie`;
+                    `${offers.length} ofertas carregadas do canal`;
                     
             } catch (error) {
                 console.error('Erro ao buscar ofertas:', error);
@@ -265,12 +269,15 @@
                 // Calcular tempo decorrido
                 const timeAgo = getTimeAgo(msg.date);
                 
+                // Gerar link para a mensagem no Telegram
+                let link = `https://t.me/${TELEGRAM_CHANNEL_USERNAME}/${msg.message_id}`;
+                
                 return {
                     title,
                     description: description || 'Confira esta oferta exclusiva!',
                     price: price, // Pode ser string vazia
                     store,
-                    link: `https://t.me/${TELEGRAM_CHANNEL_USERNAME}/${msg.message_id}`,
+                    link,
                     timeAgo,
                     isNew,
                     date: msg.date
