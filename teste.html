@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Estilos anteriores mantidos */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
         :root {
@@ -178,8 +179,6 @@
                     throw new Error('Resposta inválida da API do Telegram');
                 }
                 
-                console.log('Total de updates:', data.result.length);
-                
                 // Filtrar apenas mensagens de canal (channel_post) que tenham conteúdo
                 const channelMessages = data.result
                     .filter(update => {
@@ -190,19 +189,14 @@
                     })
                     .map(update => {
                         const post = update.channel_post;
-                        // Extrair informações do canal (se disponível)
-                        const chatUsername = post.chat && post.chat.username ? post.chat.username : 'promobilie';
                         return {
                             text: post.text || post.caption || '',
                             date: post.date * 1000,
-                            message_id: post.message_id,
-                            chat_username: chatUsername
+                            message_id: post.message_id
                         };
                     })
                     .sort((a, b) => b.date - a.date) // Ordenar do mais recente para o mais antigo
                     .slice(0, 6); // Pegar apenas as 6 mais recentes
-                
-                console.log('Mensagens de canal encontradas:', channelMessages.length);
                 
                 if (channelMessages.length === 0) {
                     throw new Error('Nenhuma mensagem de canal encontrada');
@@ -271,7 +265,7 @@
                 const timeAgo = getTimeAgo(msg.date);
                 
                 // Gerar link para a mensagem no Telegram
-                let link = `https://t.me/${msg.chat_username}/${msg.message_id}`;
+                let link = `https://t.me/promobilie/${msg.message_id}`;
                 
                 return {
                     title,
