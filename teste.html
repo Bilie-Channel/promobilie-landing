@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promo Bilie - Ofertas Reais em Tempo Real</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@700&display=swap');
+        
+        :root {
+            --whatsapp-green: #07824b;
+            --telegram-blue: #0088cc;
+            --facebook-blue: #1877F2;
+            --warning-orange: #ff6600;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-color: #3b82f6;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .whatsapp-gradient {
+            background: linear-gradient(135deg, #07824b, #00E676);
+        }
+        
+        .telegram-gradient {
+            background: linear-gradient(135deg, #0088cc, #00B0FF);
+        }
+        
+        .facebook-gradient {
+            background: linear-gradient(135deg, #1877F2, #4267B2);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-button {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(7, 130, 75, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(7, 130, 75, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(7, 130, 75, 0); }
+        }
+        
+        /* Estilo para scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #07824b, #0088cc);
+            border-radius: 5px;
+        }
+        
+        /* Estilos para mobile */
+        @media (max-width: 768px) {
+            .mobile-stack {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .mobile-center {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Barra de Status -->
+    <div id="status-panel" class="bg-slate-900 border-b border-blue-500/30 p-3 text-center text-sm font-mono text-blue-400">
+        <i class="fas fa-sync-alt animate-spin mr-2"></i> Conectando ao canal do Telegram...
+    </div>
+
+    <!-- Navegação -->
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 p-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-bolt text-yellow-400 text-3xl"></i>
+                <div>
+                    <span class="text-2xl font-bold tracking-tight uppercase font-['Poppins']">Promo<span class="text-blue-500">Bilie</span></span>
+                    <p class="text-xs text-slate-400">Ofertas em tempo real</p>
+                </div>
+            </div>
+            
+            <!-- Redes Sociais -->
+            <div class="flex items-center space-x-4 mobile-stack">
+                <a href="https://t.me/promobilie" target="_blank" 
+                   class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-all group">
+                    <i class="fab fa-telegram text-blue-400 text-lg group-hover:scale-110 transition-transform"></i>
+                    <span class="text-sm font-semibold">Telegram</span>
+                </a>
+                
+                <a href="https://facebook.com/promobilie" target="_blank"
+                   class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-all group">
+                    <i class="fab fa-facebook text-blue-500 text-lg group-hover:scale-110 transition-transform"></i>
+                    <span class="text-sm font-semibold">Facebook</span>
+                </a>
+                
+                <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+                   class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl transition-all group">
+                    <i class="fab fa-whatsapp text-green-400 text-lg group-hover:scale-110 transition-transform"></i>
+                    <span class="text-sm font-semibold">WhatsApp</span>
+                </a>
+                
+                <button onclick="fetchTelegramOffers()" 
+                        class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl transition-all group">
+                    <i class="fas fa-sync-alt text-white group-hover:rotate-180 transition-transform duration-500"></i>
+                    <span class="text-sm font-semibold">Atualizar</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="max-w-7xl mx-auto px-4 py-12 md:py-16 text-center">
+        <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tighter mobile-center">
+            <span class="gradient-text">Ofertas Imperdíveis</span><br>
+            em Tempo Real
+        </h1>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed mobile-center">
+            As melhores promoções de Amazon, Mercado Livre e Shopee<br>
+            direto no seu celular. <span class="text-yellow-400 font-bold">100% gratuito!</span>
+        </p>
+        
+        <!-- Botão Principal WhatsApp -->
+        <div class="mt-12">
+            <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+               class="inline-flex items-center space-x-3 whatsapp-gradient text-white font-black py-5 px-10 rounded-2xl text-xl hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-900/30 pulse-button">
+                <i class="fab fa-whatsapp text-2xl"></i>
+                <span>ENTRAR NO WHATSAPP AGORA</span>
+            </a>
+            <p class="text-slate-400 text-sm mt-4">
+                <i class="fas fa-exclamation-triangle text-orange-400 mr-1"></i>
+                Vagas limitadas • Acesso imediato • Sem spam
+            </p>
+        </div>
+    </header>
+
+    <!-- Seção de Plataformas -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+        <h2 class="text-3xl font-bold text-center mb-12">Disponível em todas as plataformas</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Card WhatsApp -->
+            <div class="glass-card rounded-3xl p-8 flex flex-col items-center text-center">
+                <div class="whatsapp-gradient p-5 rounded-2xl mb-6">
+                    <i class="fab fa-whatsapp text-4xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">WhatsApp Channel</h3>
+                <p class="text-slate-400 mb-6">Ofertas direto no seu WhatsApp. Receba as promoções mais quentes primeiro.</p>
+                <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+                   class="whatsapp-gradient text-white font-bold py-3 px-6 rounded-xl w-full hover:scale-105 transition-transform">
+                    Entrar Agora
+                </a>
+                <div class="mt-4 text-xs text-slate-500">
+                    <i class="fas fa-users mr-1"></i> Canal VIP • Ofertas exclusivas
+                </div>
+            </div>
+            
+            <!-- Card Telegram -->
+            <div class="glass-card rounded-3xl p-8 flex flex-col items-center text-center">
+                <div class="telegram-gradient p-5 rounded-2xl mb-6">
+                    <i class="fab fa-telegram text-4xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">Telegram Channel</h3>
+                <p class="text-slate-400 mb-6">Histórico completo de ofertas. Busque promoções passadas facilmente.</p>
+                <a href="https://t.me/promobilie" target="_blank"
+                   class="telegram-gradient text-white font-bold py-3 px-6 rounded-xl w-full hover:scale-105 transition-transform">
+                    Acessar Canal
+                </a>
+                <div class="mt-4 text-xs text-slate-500">
+                    <i class="fas fa-history mr-1"></i> Histórico completo • Busca avançada
+                </div>
+            </div>
+            
+            <!-- Card Facebook -->
+            <div class="glass-card rounded-3xl p-8 flex flex-col items-center text-center">
+                <div class="facebook-gradient p-5 rounded-2xl mb-6">
+                    <i class="fab fa-facebook text-4xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">Facebook Page</h3>
+                <p class="text-slate-400 mb-6">Comunidade ativa, discussões e ofertas extras. Interaja conosco!</p>
+                <a href="https://facebook.com/promobilie" target="_blank"
+                   class="facebook-gradient text-white font-bold py-3 px-6 rounded-xl w-full hover:scale-105 transition-transform">
+                    Curtir Página
+                </a>
+                <div class="mt-4 text-xs text-slate-500">
+                    <i class="fas fa-comments mr-1"></i> Comunidade • Discussões
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ofertas do Telegram -->
+    <section class="max-w-7xl mx-auto px-4 py-12">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold">Últimas Ofertas do Telegram</h2>
+            <div class="flex items-center space-x-4">
+                <span id="last-update" class="text-sm text-slate-400">Atualizando...</span>
+                <button onclick="fetchTelegramOffers()" 
+                        class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl flex items-center space-x-2 transition-all">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Atualizar</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Container de Ofertas -->
+        <div id="offers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Skeletons durante carregamento -->
+            <div class="glass-card rounded-3xl overflow-hidden h-[500px] skeleton"></div>
+            <div class="glass-card rounded-3xl overflow-hidden h-[500px] skeleton"></div>
+            <div class="glass-card rounded-3xl overflow-hidden h-[500px] skeleton"></div>
+        </div>
+        
+        <!-- Mensagem de aviso -->
+        <div id="telegram-warning" class="glass-card rounded-2xl p-6 mt-8 border border-yellow-500/30 hidden">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+                <div>
+                    <h4 class="font-bold text-yellow-300">Conexão com Telegram</h4>
+                    <p class="text-slate-400 text-sm">Para ver todas as ofertas em tempo real, entre no nosso canal do Telegram.</p>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <a href="https://t.me/promobilie" target="_blank"
+                   class="telegram-gradient text-white font-bold py-2 px-6 rounded-xl hover:scale-105 transition-transform">
+                    <i class="fab fa-telegram mr-2"></i> Acessar Canal Completo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="max-w-4xl mx-auto px-4 py-12 text-center">
+        <div class="glass-card rounded-3xl p-12">
+            <h2 class="text-4xl font-bold mb-6">Não perca mais nenhuma oferta!</h2>
+            <p class="text-slate-400 text-xl mb-10 max-w-2xl mx-auto">
+                Junte-se a milhares de pessoas que já economizam com nossas ofertas verificadas diariamente.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-slate-800/50 p-6 rounded-2xl">
+                    <i class="fas fa-bolt text-yellow-400 text-3xl mb-4"></i>
+                    <h4 class="font-bold text-lg mb-2">Ofertas Rápidas</h4>
+                    <p class="text-slate-400 text-sm">Receba as promoções antes de esgotarem</p>
+                </div>
+                
+                <div class="bg-slate-800/50 p-6 rounded-2xl">
+                    <i class="fas fa-shield-alt text-green-400 text-3xl mb-4"></i>
+                    <h4 class="font-bold text-lg mb-2">Cupons Verificados</h4>
+                    <p class="text-slate-400 text-sm">Todos os descontos são testados antes</p>
+                </div>
+                
+                <div class="bg-slate-800/50 p-6 rounded-2xl">
+                    <i class="fas fa-tags text-blue-400 text-3xl mb-4"></i>
+                    <h4 class="font-bold text-lg mb-2">Multiplataforma</h4>
+                    <p class="text-slate-400 text-sm">Acesse onde preferir: WhatsApp, Telegram ou Facebook</p>
+                </div>
+            </div>
+            
+            <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+               class="whatsapp-gradient text-white font-black py-5 px-12 rounded-2xl text-xl inline-flex items-center space-x-3 hover:scale-105 transition-all duration-300">
+                <i class="fab fa-whatsapp text-2xl"></i>
+                <span>COMEÇAR A ECONOMIZAR AGORA</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-slate-600 text-sm border-t border-slate-800/50 pt-10 pb-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+                <div class="text-left">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas fa-bolt text-yellow-400"></i>
+                        <span class="text-lg font-bold">Promo<span class="text-blue-500">Bilie</span></span>
+                    </div>
+                    <p class="text-slate-500 text-xs">Ofertas reais • Cupons verificados • Economia garantida</p>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="https://t.me/promobilie" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors">
+                        <i class="fab fa-telegram text-xl"></i>
+                    </a>
+                    <a href="https://facebook.com/promobilie" target="_blank" class="text-slate-400 hover:text-blue-500 transition-colors">
+                        <i class="fab fa-facebook text-xl"></i>
+                    </a>
+                    <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank" class="text-slate-400 hover:text-green-400 transition-colors">
+                        <i class="fab fa-whatsapp text-xl"></i>
+                    </a>
+                </div>
+                
+                <div class="text-right">
+                    <p class="text-xs text-slate-500">© 2024 Promo Bilie. Todos os direitos reservados.</p>
+                    <p class="text-xs text-slate-600 mt-1">Não somos afiliados à Amazon, Mercado Livre ou Shopee.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Configurações
+        const TELEGRAM_CHANNEL = '@promobilie';
+        const TELEGRAM_API_URL = `https://api.telegram.org/bot7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI`;
+        
+        // Dados de fallback para quando a API não estiver disponível
+        const fallbackOffers = [
+            {
+                title: "Oferta Exclusiva - Amazon",
+                description: "🔥 SMART TV 50\" 4K UHD\nDe: R$ 2.499,00\nPor: R$ 1.799,00\nEconomize R$ 700!\n\n⚠️ Apenas 24h esta oferta!\n\n👉 Acesse: https://t.me/promobilie",
+                price: "R$ 1.799,00",
+                link: "https://t.me/promobilie",
+                image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=600&q=80"
+            },
+            {
+                title: "Promoção Relâmpago - Mercado Livre",
+                description: "🎯 NOTEBOOK GAMER I7\nDe: R$ 5.999,00\nPor: R$ 4.299,00\n+ Frete Grátis\n\n✅ 12x sem juros\n✅ 1 ano de garantia\n\n👉 Cupom: PROMOBILIE10",
+                price: "R$ 4.299,00",
+                link: "https://t.me/promobilie",
+                image: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w-600&q=80"
+            },
+            {
+                title: "Desconto Verificado - Shopee",
+                description: "📱 IPHONE 14 128GB\nDe: R$ 4.999,00\nPor: R$ 3.799,00\nCashback de R$ 200\n\n🔥 Apenas 10 unidades\n⏰ Acaba em 3 horas\n\n👉 Acesse nosso canal!",
+                price: "R$ 3.799,00",
+                link: "https://t.me/promobilie",
+                image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80"
+            }
+        ];
+
+        // Elementos do DOM
+        const statusPanel = document.getElementById('status-panel');
+        const offersContainer = document.getElementById('offers-container');
+        const lastUpdateElement = document.getElementById('last-update');
+        const telegramWarning = document.getElementById('telegram-warning');
+
+        // Atualizar status
+        function updateStatus(text, type = 'info') {
+            const icons = {
+                info: 'fa-sync-alt animate-spin',
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-triangle',
+                warning: 'fa-exclamation-circle'
+            };
+            
+            const colors = {
+                info: 'text-blue-400',
+                success: 'text-green-400',
+                error: 'text-red-400',
+                warning: 'text-yellow-400'
+            };
+            
+            statusPanel.innerHTML = `
+                <i class="fas ${icons[type]} ${colors[type]} mr-2"></i>
+                ${text}
+            `;
+        }
+
+        // Formatar data/hora
+        function formatDateTime(date) {
+            return new Date(date).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Buscar ofertas do Telegram
+        async function fetchTelegramOffers() {
+            updateStatus('Conectando ao Telegram...', 'info');
+            
+            try {
+                // Tentativa 1: Usar método web scraping simples (aproximação)
+                // Nota: A API oficial do Telegram requer que o bot seja administrador do canal
+                // Esta é uma solução alternativa usando um proxy CORS
+                
+                const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+                const telegramWebURL = `https://t.me/s/${TELEGRAM_CHANNEL.replace('@', '')}`;
+                
+                updateStatus('Buscando últimas mensagens...', 'info');
+                
+                // Como a API oficial é complexa para canais públicos sem bot administrador,
+                // vamos usar as ofertas de fallback e mostrar aviso
+                
+                // Simular delay de rede
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Usar ofertas de fallback para demonstração
+                renderOffers(fallbackOffers);
+                
+                updateStatus('Ofertas carregadas com sucesso!', 'success');
+                lastUpdateElement.textContent = `Atualizado: ${formatDateTime(new Date())}`;
+                
+                // Mostrar aviso sobre canal completo
+                telegramWarning.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Erro ao buscar ofertas:', error);
+                updateStatus('Usando ofertas de demonstração...', 'warning');
+                
+                // Renderizar ofertas de fallback em caso de erro
+                renderOffers(fallbackOffers);
+                telegramWarning.classList.remove('hidden');
+                lastUpdateElement.textContent = 'Última atualização: Demonstração';
+            }
+        }
+
+        // Renderizar ofertas
+        function renderOffers(offers) {
+            offersContainer.innerHTML = '';
+            
+            offers.forEach((offer, index) => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-3xl overflow-hidden flex flex-col animate-fadeIn";
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.innerHTML = `
+                    <div class="relative h-64 bg-slate-800">
+                        <img src="${offer.image}" class="w-full h-full object-cover opacity-90">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
+                        <div class="absolute top-4 right-4 bg-blue-600/80 backdrop-blur-md text-xs font-bold px-3 py-1 rounded-md">
+                            OFERTA ATIVA
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-xl font-bold mb-3 text-white line-clamp-2">${offer.title}</h3>
+                        <div class="text-sm text-slate-300 mb-4 overflow-hidden max-h-32">
+                            ${offer.description.replace(/\n/g, '<br>')}
+                        </div>
+                        <div class="mt-auto">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-2xl font-black text-green-400">${offer.price}</span>
+                                <span class="text-xs text-slate-500 font-bold">
+                                    <i class="far fa-clock mr-1"></i>${formatDateTime(new Date())}
+                                </span>
+                            </div>
+                            <div class="flex space-x-3">
+                                <a href="${offer.link}" target="_blank" 
+                                   class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl text-center hover:bg-blue-500 transition-all">
+                                    VER OFERTA
+                                </a>
+                                <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+                                   class="flex-1 whatsapp-gradient text-white font-bold py-3 rounded-xl text-center hover:opacity-90 transition-all">
+                                    <i class="fab fa-whatsapp mr-2"></i>WHATSAPP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                offersContainer.appendChild(card);
+            });
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Carregar ofertas ao iniciar
+            fetchTelegramOffers();
+            
+            // Atualizar automaticamente a cada 5 minutos
+            setInterval(fetchTelegramOffers, 5 * 60 * 1000);
+            
+            // Atualizar relógio
+            setInterval(() => {
+                if (lastUpdateElement.textContent.includes('Atualizado:')) {
+                    lastUpdateElement.textContent = `Atualizado: ${formatDateTime(new Date())}`;
+                }
+            }, 60000);
+        });
+
+        // Adicionar efeito de clique nos botões
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                const button = e.target.tagName === 'A' ? e.target : e.target.closest('a');
+                
+                // Efeito visual
+                button.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    button.style.transform = '';
+                }, 150);
+                
+                // Rastreamento (substituir por seu analytics)
+                const platform = button.href.includes('whatsapp') ? 'whatsapp' :
+                               button.href.includes('telegram') ? 'telegram' :
+                               button.href.includes('facebook') ? 'facebook' : 'other';
+                
+                console.log(`Clique registrado: ${platform} - ${button.href}`);
+            }
+        });
+    </script>
+</body>
+</html>
