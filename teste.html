@@ -331,6 +331,16 @@
             margin-top: 30px;
         }
         
+        /* Aviso de fallback */
+        .fallback-notice {
+            text-align: center;
+            padding: 15px;
+            background-color: #fff8e1;
+            border-radius: var(--radius);
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        
         /* Footer */
         footer {
             background-color: var(--dark);
@@ -461,9 +471,13 @@
                 <!-- Ofertas serão carregadas aqui -->
             </div>
             
+            <div id="fallback-notice" class="fallback-notice" style="display: none;">
+                <p><strong>Nota:</strong> Estamos mostrando ofertas de exemplo. As ofertas reais estarão disponíveis quando o canal do Telegram estiver ativo.</p>
+            </div>
+            
             <div class="refresh-btn-container">
-                <button onclick="loadOffers()" class="btn btn-telegram" id="refresh-btn">
-                    <i class="fas fa-sync-alt"></i> Atualizar Ofertas
+                <button onclick="loadRealOffers()" class="btn btn-telegram" id="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Tentar Carregar Ofertas Reais
                 </button>
             </div>
         </div>
@@ -493,139 +507,152 @@
             document.getElementById('whatsapp-link').href = 'https://wa.me/seu-numero-aqui';
             document.getElementById('facebook-link').href = 'https://facebook.com/sua-pagina-aqui';
             
-            // Carregar ofertas ao iniciar
-            loadOffers();
+            // Mostrar ofertas simuladas inicialmente
+            showSampleOffers();
+            
+            // Tentar carregar ofertas reais em segundo plano
+            setTimeout(loadRealOffers, 1000);
         });
         
-        // Função para carregar ofertas
-        async function loadOffers() {
+        // Função para carregar ofertas REAIS do Telegram
+        async function loadRealOffers() {
             const container = document.getElementById('offers-container');
             const refreshBtn = document.getElementById('refresh-btn');
+            const fallbackNotice = document.getElementById('fallback-notice');
             
             // Mostrar estado de carregamento
             container.innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Carregando últimas ofertas...</p>
+                    <p>Carregando últimas ofertas do Telegram...</p>
                 </div>
             `;
             
             // Desabilitar botão durante o carregamento
             refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando ofertas...';
+            fallbackNotice.style.display = 'none';
             
             try {
-                // Usar um serviço de proxy confiável para RSS
-                const rssUrl = 'https://t.me/s/promobilie/rss';
-                const proxyUrl = 'https://api.rss2json.com/v1/api.json?rss_url=';
+                // Método 1: Tentar acessar o canal do Telegram via web scraping (usando proxy CORS)
+                const telegramUrl = 'https://t.me/s/promobilie';
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(telegramUrl);
                 
-                const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/html'
+                    }
+                });
                 
                 if (!response.ok) {
-                    throw new Error('Falha ao carregar o feed RSS');
+                    throw new Error('Falha ao acessar o canal do Telegram');
                 }
                 
                 const data = await response.json();
+                const htmlContent = data.contents;
                 
-                // Verificar se há itens
-                if (data.items && data.items.length > 0) {
-                    // Limitar aos 6 últimos itens
-                    const recentItems = data.items.slice(0, 6);
-                    
-                    // Gerar HTML para cada oferta
+                // Analisar o HTML para extrair mensagens
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                
+                // Encontrar mensagens no canal do Telegram
+                // As mensagens do Telegram geralmente estão em elementos com classe 'tgme_widget_message'
+                const messages = doc.querySelectorAll('.tgme_widget_message');
+                
+                if (messages.length > 0) {
+                    // Processar as últimas 6 mensagens
+                    const recentMessages = Array.from(messages).slice(0, 6);
                     let offersHTML = '';
                     
-                    recentItems.forEach(item => {
-                        const title = item.title || 'Oferta sem título';
-                        const link = item.link || '#';
-                        const description = item.description || 'Sem descrição disponível';
-                        const pubDate = item.pubDate || '';
+                    recentMessages.forEach((message, index) => {
+                        // Extrair texto da mensagem
+                        const textElement = message.querySelector('.tgme_widget_message_text');
+                        const text = textElement ? textElement.textContent.trim() : 'Mensagem sem texto';
                         
-                        // Extrair imagem da descrição (se existir)
-                        let imageUrl = '';
-                        const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
-                        if (imgMatch && imgMatch[1]) {
-                            imageUrl = imgMatch[1];
-                        } else if (item.enclosure && item.enclosure.link) {
-                            // Tentar obter imagem do enclosure
-                            imageUrl = item.enclosure.link;
-                        }
+                        // Extrair data/hora
+                        const timeElement = message.querySelector('.tgme_widget_message_date time');
+                        const timeText = timeElement ? timeElement.getAttribute('datetime') : '';
+                        
+                        // Extrair imagem
+                        const photoElement = message.querySelector('.tgme_widget_message_photo_wrap');
+                        const imageUrl = photoElement ? photoElement.style.backgroundImage.replace('url(', '').replace(')', '').replace(/"/g, '') : '';
+                        
+                        // Extrair link da mensagem
+                        const linkElement = message.querySelector('.tgme_widget_message_date');
+                        const messageLink = linkElement ? linkElement.href : `https://t.me/promobilie/${index + 1}`;
                         
                         // Formatar data
                         let formattedDate = '';
-                        if (pubDate) {
+                        if (timeText) {
                             try {
-                                const dateObj = new Date(pubDate);
+                                const dateObj = new Date(timeText);
                                 formattedDate = dateObj.toLocaleDateString('pt-BR', {
                                     day: '2-digit',
                                     month: '2-digit',
                                     year: 'numeric'
+                                }) + ' ' + dateObj.toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
                                 });
                             } catch (e) {
                                 formattedDate = 'Data não disponível';
                             }
                         }
                         
-                        // Limitar o título e descrição para exibição
-                        const shortTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
-                        const shortDescription = description.length > 150 ? 
-                            description.substring(0, 150).replace(/<[^>]*>/g, '') + '...' : 
-                            description.replace(/<[^>]*>/g, '');
+                        // Criar título a partir do início do texto
+                        const title = text.length > 80 ? text.substring(0, 80) + '...' : text;
+                        const description = text.length > 150 ? text.substring(0, 150) + '...' : text;
                         
                         offersHTML += `
                             <div class="offer-card">
                                 ${imageUrl ? 
-                                    `<img src="${imageUrl}" alt="${shortTitle}" class="offer-image" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\"default-image\"><i class=\"fas fa-gift\"></i></div>';">` : 
+                                    `<img src="${imageUrl}" alt="${title}" class="offer-image">` : 
                                     `<div class="default-image"><i class="fas fa-gift"></i></div>`
                                 }
                                 <div class="offer-content">
                                     <div class="offer-date">
                                         <i class="far fa-calendar-alt"></i> ${formattedDate || 'Data não disponível'}
                                     </div>
-                                    <h3 class="offer-title">${shortTitle}</h3>
-                                    <p class="offer-description">${shortDescription}</p>
-                                    <a href="${link}" target="_blank" class="offer-link">
-                                        Ver oferta completa <i class="fas fa-arrow-right"></i>
+                                    <h3 class="offer-title">${title}</h3>
+                                    <p class="offer-description">${description}</p>
+                                    <a href="${messageLink}" target="_blank" class="offer-link">
+                                        Ver oferta no Telegram <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
                             </div>
                         `;
                     });
                     
-                    // Inserir ofertas no container
                     container.innerHTML = offersHTML;
+                    refreshBtn.innerHTML = '<i class="fas fa-check"></i> Ofertas Reais Carregadas';
+                    refreshBtn.style.backgroundColor = '#28a745';
+                    
+                    // Ocultar aviso de fallback
+                    fallbackNotice.style.display = 'none';
                     
                 } else {
-                    // Nenhum item encontrado
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <h3>Nenhuma oferta encontrada</h3>
-                            <p>Aguarde novas postagens no canal do Telegram.</p>
-                        </div>
-                    `;
+                    // Se não encontrar mensagens, usar método alternativo
+                    throw new Error('Não foi possível extrair mensagens do canal');
                 }
                 
             } catch (error) {
-                console.error('Erro ao carregar ofertas:', error);
+                console.error('Erro ao carregar ofertas reais:', error);
                 
-                // Mostrar mensagem de erro
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Erro ao carregar ofertas</h3>
-                        <p>Não foi possível carregar as últimas ofertas. Tente novamente mais tarde.</p>
-                    </div>
-                `;
+                // Se falhar, mostrar ofertas simuladas com aviso
+                showSampleOffers();
+                fallbackNotice.style.display = 'block';
                 
-                // Como fallback, mostrar ofertas de exemplo
-                setTimeout(() => {
-                    showSampleOffers();
-                }, 1000);
+                // Atualizar botão
+                refreshBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Falha ao carregar. Tentar novamente?';
+                refreshBtn.style.backgroundColor = '';
             } finally {
-                // Reabilitar botão
-                refreshBtn.disabled = false;
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Ofertas';
+                // Reabilitar botão após 3 segundos
+                setTimeout(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Ofertas';
+                    refreshBtn.style.backgroundColor = '';
+                }, 3000);
             }
         }
         
@@ -635,40 +662,40 @@
             
             const sampleOffers = [
                 {
-                    title: "Smartphone com Desconto Especial",
-                    description: "Modelo topo de linha com 30% de desconto para os primeiros clientes.",
-                    date: "15/10/2023",
-                    image: null
+                    title: "🎁 OFERTA RELÂMPAGO: Smartphone com 40% OFF",
+                    description: "Modelo topo de linha com processador Snapdragon, 8GB RAM e 256GB armazenamento. Apenas hoje!",
+                    date: "Hoje, 14:30",
+                    link: "https://t.me/promobilie"
                 },
                 {
-                    title: "Notebook Gamer em Promoção",
-                    description: "Configuração potente para jogos e trabalho com preço especial por tempo limitado.",
-                    date: "14/10/2023",
-                    image: null
+                    title: "🔥 PROMOÇÃO: Notebook Gamer i7 + Placa Dedicada",
+                    description: "Notebook gamer com RTX 3060, 16GB RAM, SSD 1TB. 12x sem juros ou 15% de desconto à vista.",
+                    date: "Ontem, 18:45",
+                    link: "https://t.me/promobilie"
                 },
                 {
-                    title: "Fones de Ouvido Bluetooth",
-                    description: "Qualidade de som premium com cancelamento de ruído ativo.",
-                    date: "13/10/2023",
-                    image: null
+                    title: "🚨 LIQUIDAÇÃO: Smart TV 55'' 4K UHD",
+                    description: "TV Android com Google Assistant, HDR10+, Dolby Vision. Preço especial por tempo limitado!",
+                    date: "Ontem, 11:20",
+                    link: "https://t.me/promobilie"
                 },
                 {
-                    title: "Smart TV 4K com Netflix Gratis",
-                    description: "TV inteligente com resolução 4K e 3 meses de Netflix incluso.",
-                    date: "12/10/2023",
-                    image: null
+                    title: "💎 EXCLUSIVO: Fones Bluetooth com ANC",
+                    description: "Cancelamento de ruído ativo, bateria 30h, à prova d'água. Preço promocional para seguidores!",
+                    date: "15/10, 09:15",
+                    link: "https://t.me/promobilie"
                 },
                 {
-                    title: "Console de Videogame em Oferta",
-                    description: "Última geração com 2 jogos grátis na compra.",
-                    date: "11/10/2023",
-                    image: null
+                    title: "🎮 CONSOLE + 3 JOGOS GRÁTIS",
+                    description: "Console última geração com 3 jogos digitais incluídos. Apenas 10 unidades disponíveis!",
+                    date: "14/10, 16:30",
+                    link: "https://t.me/promobilie"
                 },
                 {
-                    title: "Tablet com Caneta Digital",
-                    description: "Perfeito para estudos, trabalho e entretenimento com desconto especial.",
-                    date: "10/10/2023",
-                    image: null
+                    title: "📱 TABLET Premium com Caneta Digital",
+                    description: "Tablet para estudos e trabalho, tela 11'', 128GB. Desconto especial para estudantes!",
+                    date: "13/10, 20:10",
+                    link: "https://t.me/promobilie"
                 }
             ];
             
@@ -677,14 +704,14 @@
             sampleOffers.forEach(offer => {
                 offersHTML += `
                     <div class="offer-card">
-                        <div class="default-image"><i class="fas fa-gift"></i></div>
+                        <div class="default-image"><i class="fas fa-bolt"></i></div>
                         <div class="offer-content">
                             <div class="offer-date">
                                 <i class="far fa-calendar-alt"></i> ${offer.date}
                             </div>
                             <h3 class="offer-title">${offer.title}</h3>
                             <p class="offer-description">${offer.description}</p>
-                            <a href="https://t.me/promobilie" target="_blank" class="offer-link">
+                            <a href="${offer.link}" target="_blank" class="offer-link">
                                 Ver oferta no Telegram <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -692,11 +719,7 @@
                 `;
             });
             
-            container.innerHTML = offersHTML + `
-                <div class="empty-state" style="grid-column: 1 / -1; margin-top: 20px;">
-                    <p><strong>Nota:</strong> Estas são ofertas de exemplo. As ofertas reais serão carregadas automaticamente quando disponíveis.</p>
-                </div>
-            `;
+            container.innerHTML = offersHTML;
         }
     </script>
 </body>
