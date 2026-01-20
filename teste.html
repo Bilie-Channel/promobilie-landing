@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Promo Bilie - Ofertas em Tempo Real do Telegram</title>
+    <!-- Nota: Para produção, instale o Tailwind CSS via PostCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Estilos anteriores mantidos */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
         :root {
@@ -233,7 +233,7 @@
                     title = title.substring(0, 60) + '...';
                 }
                 
-                // Extrair preço (se existir)
+                // Extrair preço (se existir) - DEIXAR EM BRANCO se não encontrar
                 let price = '';
                 const priceMatch = text.match(/R\$\s?[\d.,]+/g);
                 if (priceMatch && priceMatch.length > 0) {
@@ -264,7 +264,7 @@
                 // Calcular tempo decorrido
                 const timeAgo = getTimeAgo(msg.date);
                 
-                // Gerar link para a mensagem no Telegram
+                // Gerar link para a mensagem no Telegram - usar o canal @promobilie diretamente
                 let link = `https://t.me/promobilie/${msg.message_id}`;
                 
                 return {
