@@ -325,6 +325,12 @@
             opacity: 0.5;
         }
         
+        /* Botão de atualização */
+        .refresh-btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
         /* Footer */
         footer {
             background-color: var(--dark);
@@ -452,11 +458,13 @@
             </p>
             
             <div class="offers-grid" id="offers-container">
-                <!-- As ofertas serão carregadas aqui via JavaScript -->
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Carregando últimas ofertas...</p>
-                </div>
+                <!-- Ofertas serão carregadas aqui -->
+            </div>
+            
+            <div class="refresh-btn-container">
+                <button onclick="loadOffers()" class="btn btn-telegram" id="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Atualizar Ofertas
+                </button>
             </div>
         </div>
     </section>
@@ -485,85 +493,89 @@
             document.getElementById('whatsapp-link').href = 'https://wa.me/seu-numero-aqui';
             document.getElementById('facebook-link').href = 'https://facebook.com/sua-pagina-aqui';
             
-            // URL do RSS do Telegram
-            const rssUrl = 'https://t.me/s/promobilie/rss';
+            // Carregar ofertas ao iniciar
+            loadOffers();
+        });
+        
+        // Função para carregar ofertas
+        async function loadOffers() {
+            const container = document.getElementById('offers-container');
+            const refreshBtn = document.getElementById('refresh-btn');
             
-            // Função para buscar e exibir as ofertas do RSS
-            async function fetchOffers() {
-                const container = document.getElementById('offers-container');
+            // Mostrar estado de carregamento
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando últimas ofertas...</p>
+                </div>
+            `;
+            
+            // Desabilitar botão durante o carregamento
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+            
+            try {
+                // Usar um serviço de proxy confiável para RSS
+                const rssUrl = 'https://t.me/s/promobilie/rss';
+                const proxyUrl = 'https://api.rss2json.com/v1/api.json?rss_url=';
                 
-                try {
-                    // Usando um proxy CORS para evitar problemas de acesso
-                    const proxyUrl = 'https://api.allorigins.win/get?url=';
-                    const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
-                    
-                    if (!response.ok) {
-                        throw new Error('Falha ao carregar o feed RSS');
-                    }
-                    
-                    const data = await response.json();
-                    const rssText = data.contents;
-                    
-                    // Parse do XML RSS
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(rssText, 'text/xml');
-                    
-                    // Extrair os itens do RSS
-                    const items = xmlDoc.querySelectorAll('item');
-                    
+                const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
+                
+                if (!response.ok) {
+                    throw new Error('Falha ao carregar o feed RSS');
+                }
+                
+                const data = await response.json();
+                
+                // Verificar se há itens
+                if (data.items && data.items.length > 0) {
                     // Limitar aos 6 últimos itens
-                    const recentItems = Array.from(items).slice(0, 6);
-                    
-                    // Se não houver itens, mostrar mensagem
-                    if (recentItems.length === 0) {
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <i class="fas fa-inbox"></i>
-                                <h3>Nenhuma oferta encontrada</h3>
-                                <p>Aguarde novas postagens no canal do Telegram.</p>
-                            </div>
-                        `;
-                        return;
-                    }
+                    const recentItems = data.items.slice(0, 6);
                     
                     // Gerar HTML para cada oferta
                     let offersHTML = '';
                     
                     recentItems.forEach(item => {
-                        const title = item.querySelector('title')?.textContent || 'Oferta sem título';
-                        const link = item.querySelector('link')?.textContent || '#';
-                        const description = item.querySelector('description')?.textContent || 'Sem descrição disponível';
-                        const pubDate = item.querySelector('pubDate')?.textContent || '';
+                        const title = item.title || 'Oferta sem título';
+                        const link = item.link || '#';
+                        const description = item.description || 'Sem descrição disponível';
+                        const pubDate = item.pubDate || '';
                         
                         // Extrair imagem da descrição (se existir)
                         let imageUrl = '';
-                        const descriptionText = description;
-                        const imgMatch = descriptionText.match(/<img[^>]+src="([^">]+)"/);
+                        const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
                         if (imgMatch && imgMatch[1]) {
                             imageUrl = imgMatch[1];
+                        } else if (item.enclosure && item.enclosure.link) {
+                            // Tentar obter imagem do enclosure
+                            imageUrl = item.enclosure.link;
                         }
                         
                         // Formatar data
                         let formattedDate = '';
                         if (pubDate) {
-                            const dateObj = new Date(pubDate);
-                            formattedDate = dateObj.toLocaleDateString('pt-BR', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            });
+                            try {
+                                const dateObj = new Date(pubDate);
+                                formattedDate = dateObj.toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                });
+                            } catch (e) {
+                                formattedDate = 'Data não disponível';
+                            }
                         }
                         
                         // Limitar o título e descrição para exibição
                         const shortTitle = title.length > 60 ? title.substring(0, 60) + '...' : title;
-                        const shortDescription = descriptionText.length > 150 ? 
-                            descriptionText.substring(0, 150).replace(/<[^>]*>/g, '') + '...' : 
-                            descriptionText.replace(/<[^>]*>/g, '');
+                        const shortDescription = description.length > 150 ? 
+                            description.substring(0, 150).replace(/<[^>]*>/g, '') + '...' : 
+                            description.replace(/<[^>]*>/g, '');
                         
                         offersHTML += `
                             <div class="offer-card">
                                 ${imageUrl ? 
-                                    `<img src="${imageUrl}" alt="${shortTitle}" class="offer-image">` : 
+                                    `<img src="${imageUrl}" alt="${shortTitle}" class="offer-image" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\"default-image\"><i class=\"fas fa-gift\"></i></div>';">` : 
                                     `<div class="default-image"><i class="fas fa-gift"></i></div>`
                                 }
                                 <div class="offer-content">
@@ -583,34 +595,109 @@
                     // Inserir ofertas no container
                     container.innerHTML = offersHTML;
                     
-                } catch (error) {
-                    console.error('Erro ao carregar ofertas:', error);
+                } else {
+                    // Nenhum item encontrado
                     container.innerHTML = `
                         <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Erro ao carregar ofertas</h3>
-                            <p>Não foi possível carregar as últimas ofertas. Tente novamente mais tarde.</p>
-                            <button onclick="fetchOffers()" class="btn" style="margin-top: 15px;">
-                                <i class="fas fa-redo"></i> Tentar novamente
-                            </button>
+                            <i class="fas fa-inbox"></i>
+                            <h3>Nenhuma oferta encontrada</h3>
+                            <p>Aguarde novas postagens no canal do Telegram.</p>
                         </div>
                     `;
                 }
+                
+            } catch (error) {
+                console.error('Erro ao carregar ofertas:', error);
+                
+                // Mostrar mensagem de erro
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erro ao carregar ofertas</h3>
+                        <p>Não foi possível carregar as últimas ofertas. Tente novamente mais tarde.</p>
+                    </div>
+                `;
+                
+                // Como fallback, mostrar ofertas de exemplo
+                setTimeout(() => {
+                    showSampleOffers();
+                }, 1000);
+            } finally {
+                // Reabilitar botão
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Ofertas';
             }
+        }
+        
+        // Função para mostrar ofertas de exemplo (fallback)
+        function showSampleOffers() {
+            const container = document.getElementById('offers-container');
             
-            // Carregar as ofertas ao iniciar
-            fetchOffers();
+            const sampleOffers = [
+                {
+                    title: "Smartphone com Desconto Especial",
+                    description: "Modelo topo de linha com 30% de desconto para os primeiros clientes.",
+                    date: "15/10/2023",
+                    image: null
+                },
+                {
+                    title: "Notebook Gamer em Promoção",
+                    description: "Configuração potente para jogos e trabalho com preço especial por tempo limitado.",
+                    date: "14/10/2023",
+                    image: null
+                },
+                {
+                    title: "Fones de Ouvido Bluetooth",
+                    description: "Qualidade de som premium com cancelamento de ruído ativo.",
+                    date: "13/10/2023",
+                    image: null
+                },
+                {
+                    title: "Smart TV 4K com Netflix Gratis",
+                    description: "TV inteligente com resolução 4K e 3 meses de Netflix incluso.",
+                    date: "12/10/2023",
+                    image: null
+                },
+                {
+                    title: "Console de Videogame em Oferta",
+                    description: "Última geração com 2 jogos grátis na compra.",
+                    date: "11/10/2023",
+                    image: null
+                },
+                {
+                    title: "Tablet com Caneta Digital",
+                    description: "Perfeito para estudos, trabalho e entretenimento com desconto especial.",
+                    date: "10/10/2023",
+                    image: null
+                }
+            ];
             
-            // Adicionar botão para recarregar manualmente (opcional)
-            const reloadBtn = document.createElement('button');
-            reloadBtn.className = 'btn btn-telegram';
-            reloadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Ofertas';
-            reloadBtn.style.margin = '20px auto';
-            reloadBtn.style.display = 'block';
-            reloadBtn.onclick = fetchOffers;
+            let offersHTML = '';
             
-            document.querySelector('.offers-section .container').appendChild(reloadBtn);
-        });
+            sampleOffers.forEach(offer => {
+                offersHTML += `
+                    <div class="offer-card">
+                        <div class="default-image"><i class="fas fa-gift"></i></div>
+                        <div class="offer-content">
+                            <div class="offer-date">
+                                <i class="far fa-calendar-alt"></i> ${offer.date}
+                            </div>
+                            <h3 class="offer-title">${offer.title}</h3>
+                            <p class="offer-description">${offer.description}</p>
+                            <a href="https://t.me/promobilie" target="_blank" class="offer-link">
+                                Ver oferta no Telegram <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = offersHTML + `
+                <div class="empty-state" style="grid-column: 1 / -1; margin-top: 20px;">
+                    <p><strong>Nota:</strong> Estas são ofertas de exemplo. As ofertas reais serão carregadas automaticamente quando disponíveis.</p>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
