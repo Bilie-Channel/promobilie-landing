@@ -151,80 +151,45 @@
         </div>
     </footer>
 
-   <script>
+ <script>
     // Configurações
-    const TELEGRAM_BOT_TOKEN = '7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI';
+    const TELEGRAM_CHANNEL = 'promobilie'; // Sem o @
     
     // Elementos do DOM
     const connectionStatus = document.getElementById('connection-status');
     const offersContainer = document.getElementById('offers-container');
     
-    // Flag para controlar se já estamos buscando ofertas
-    let isLoading = false;
-    
-    // Função para buscar as últimas mensagens do canal usando a API do Telegram
+    // Função para buscar ofertas usando a web pública do Telegram
     async function loadTelegramOffers(forceUpdate = false) {
-        // Evitar múltiplas chamadas simultâneas
-        if (isLoading && !forceUpdate) return;
-        
         try {
-            isLoading = true;
             connectionStatus.innerHTML = '<i class="fas fa-circle animate-pulse mr-1"></i>Buscando últimas ofertas...';
             
-            // Buscar as atualizações recentes do bot
-            const updatesUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=100`;
+            // Usar a API pública do Telegram (t.me/s/channel)
+            const telegramWebUrl = `https://t.me/s/${TELEGRAM_CHANNEL}`;
             
-            // Usar um timeout para evitar que a requisição fique pendente
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Timeout ao buscar ofertas')), 10000);
-            });
+            // Usar um proxy CORS para acessar o conteúdo
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
+            const encodedUrl = encodeURIComponent(telegramWebUrl);
             
-            const fetchPromise = fetch(updatesUrl, {
-                method: 'GET',
+            const response = await fetch(`${proxyUrl}${encodedUrl}`, {
                 headers: {
-                    'Accept': 'application/json',
-                },
-                // Evitar cache
-                cache: 'no-cache'
+                    'Accept': 'text/html',
+                }
             });
-            
-            const response = await Promise.race([fetchPromise, timeoutPromise]);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
             
             const data = await response.json();
+            const html = data.contents;
             
-            if (!data.ok || !data.result) {
-                throw new Error('Resposta inválida da API do Telegram');
+            // Extrair mensagens do HTML
+            const offers = extractOffersFromHTML(html);
+            
+            if (offers.length === 0) {
+                throw new Error('Nenhuma oferta encontrada');
             }
-            
-            // Filtrar apenas mensagens de canal (channel_post) que tenham conteúdo
-            const channelMessages = data.result
-                .filter(update => {
-                    const channelPost = update.channel_post;
-                    // Verificar se é uma mensagem de canal com conteúdo (text ou caption)
-                    return channelPost && 
-                           (channelPost.text || channelPost.caption);
-                })
-                .map(update => {
-                    const post = update.channel_post;
-                    return {
-                        text: post.text || post.caption || '',
-                        date: post.date * 1000,
-                        message_id: post.message_id
-                    };
-                })
-                .sort((a, b) => b.date - a.date) // Ordenar do mais recente para o mais antigo
-                .slice(0, 6); // Pegar apenas as 6 mais recentes
-            
-            if (channelMessages.length === 0) {
-                throw new Error('Nenhuma mensagem de canal encontrada');
-            }
-            
-            // Processar as mensagens para extrair informações das ofertas
-            const offers = processMessages(channelMessages);
             
             // Renderizar as ofertas
             renderOffers(offers);
@@ -235,38 +200,29 @@
         } catch (error) {
             console.error('Erro ao buscar ofertas:', error);
             
-            // Tentar método alternativo se o primeiro falhar
-            if (error.message.includes('Timeout') || error.message.includes('Failed to fetch')) {
-                try {
-                    await tryAlternativeMethod();
-                    return;
-                } catch (altError) {
-                    console.error('Método alternativo também falhou:', altError);
-                }
+            // Tentar método alternativo
+            try {
+                await tryBotApiMethod();
+                return;
+            } catch (botError) {
+                console.error('Método do bot também falhou:', botError);
+                connectionStatus.innerHTML = '<i class="fas fa-circle text-yellow-400 mr-1"></i>' + 
+                    'Usando ofertas de exemplo';
+                
+                // Carregar ofertas de exemplo em caso de erro
+                loadExampleOffers();
             }
-            
-            connectionStatus.innerHTML = '<i class="fas fa-circle text-yellow-400 mr-1"></i>' + 
-                'Usando ofertas de exemplo';
-            
-            // Carregar ofertas de exemplo em caso de erro
-            loadExampleOffers();
-        } finally {
-            isLoading = false;
         }
     }
 
-    // Método alternativo usando proxy CORS
-    async function tryAlternativeMethod() {
-        connectionStatus.innerHTML = '<i class="fas fa-circle animate-pulse mr-1"></i>Tentando método alternativo...';
+    // Método alternativo usando a API do bot
+    async function tryBotApiMethod() {
+        connectionStatus.innerHTML = '<i class="fas fa-circle animate-pulse mr-1"></i>Tentando método do bot...';
         
-        const proxyUrl = 'https://corsproxy.io/?';
-        const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=50`;
+        const TELEGRAM_BOT_TOKEN = '7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI';
+        const updatesUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=-100&limit=100`;
         
-        const response = await fetch(proxyUrl + encodeURIComponent(telegramUrl), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
+        const response = await fetch(updatesUrl);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -278,7 +234,7 @@
             throw new Error('Resposta inválida da API do Telegram');
         }
         
-        // Filtrar apenas mensagens de canal (channel_post) que tenham conteúdo
+        // Filtrar apenas mensagens de canal
         const channelMessages = data.result
             .filter(update => {
                 const channelPost = update.channel_post;
@@ -303,66 +259,129 @@
         renderOffers(offers);
         
         connectionStatus.innerHTML = '<i class="fas fa-circle text-green-400 mr-1"></i>' + 
-            `${offers.length} ofertas carregadas (método alternativo)`;
+            `${offers.length} ofertas carregadas (API do bot)`;
     }
 
-    // Função para processar mensagens e extrair informações das ofertas
-    function processMessages(messages) {
-        return messages.map(msg => {
-            const text = msg.text;
-            const lines = text.split('\n').filter(line => line.trim().length > 0);
+    // Extrair ofertas do HTML da página do Telegram
+    function extractOffersFromHTML(html) {
+        const offers = [];
+        
+        try {
+            // Usar DOMParser para parsear o HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
             
-            // Extrair título (primeira linha ou primeira parte)
-            let title = lines[0] || 'Nova Oferta';
-            if (title.length > 60) {
-                title = title.substring(0, 60) + '...';
-            }
+            // Encontrar todas as mensagens
+            const messageElements = doc.querySelectorAll('.tgme_widget_message');
             
-            // Extrair preço (se existir) - DEIXAR EM BRANCO se não encontrar
-            let price = '';
-            const priceMatch = text.match(/R\$\s?[\d.,]+/g);
-            if (priceMatch && priceMatch.length > 0) {
-                price = priceMatch[0];
-            }
+            // Pegar as últimas 6 mensagens
+            const recentMessages = Array.from(messageElements)
+                .slice(0, 12) // Pegar um pouco mais para filtrar
+                .filter(el => {
+                    // Filtrar apenas mensagens que parecem ser ofertas
+                    const text = el.querySelector('.tgme_widget_message_text')?.textContent || '';
+                    return text.includes('R$') || 
+                           text.includes('desconto') || 
+                           text.includes('promoção') || 
+                           text.includes('cupom');
+                })
+                .slice(0, 6); // Limitar a 6 ofertas
             
-            // Extrair loja (detectar por palavras-chave)
-            let store = 'Loja Parceira';
-            const textLower = text.toLowerCase();
-            if (textLower.includes('amazon')) store = 'Amazon';
-            else if (textLower.includes('mercado livre') || textLower.includes('ml')) store = 'Mercado Livre';
-            else if (textLower.includes('shopee')) store = 'Shopee';
-            else if (textLower.includes('aliexpress')) store = 'AliExpress';
-            else if (textLower.includes('magalu') || textLower.includes('magazine luiza')) store = 'Magazine Luiza';
-            
-            // Extrair descrição (primeiras 2-3 linhas)
-            let description = '';
-            if (lines.length > 1) {
-                description = lines.slice(1, 3).join(' • ');
-                if (description.length > 100) {
-                    description = description.substring(0, 100) + '...';
+            recentMessages.forEach((messageEl, index) => {
+                // Extrair texto
+                const textEl = messageEl.querySelector('.tgme_widget_message_text');
+                const text = textEl ? textEl.textContent : '';
+                
+                // Extrair data
+                const timeEl = messageEl.querySelector('time');
+                const date = timeEl ? new Date(timeEl.getAttribute('datetime')).getTime() : Date.now() - (index * 3600000);
+                
+                // Extrair ID da mensagem
+                const messageId = messageEl.id ? messageEl.id.replace('message', '') : Date.now();
+                
+                // Processar a mensagem
+                const offer = processMessage(text, date, messageId);
+                if (offer) {
+                    offers.push(offer);
                 }
-            }
+            });
             
-            // Determinar se é nova (menos de 24 horas)
-            const isNew = (Date.now() - msg.date) < 24 * 60 * 60 * 1000;
-            
-            // Calcular tempo decorrido
-            const timeAgo = getTimeAgo(msg.date);
-            
-            // Gerar link para a mensagem no Telegram
-            let link = `https://t.me/promobilie/${msg.message_id}`;
-            
-            return {
-                title,
-                description: description || 'Confira esta oferta exclusiva!',
-                price: price, // Pode ser string vazia
-                store,
-                link,
-                timeAgo,
-                isNew,
-                date: msg.date
-            };
-        });
+        } catch (error) {
+            console.error('Erro ao extrair ofertas do HTML:', error);
+        }
+        
+        return offers;
+    }
+
+    // Processar uma mensagem individual
+    function processMessage(text, date, messageId) {
+        if (!text || text.length < 10) return null;
+        
+        const lines = text.split('\n').filter(line => line.trim().length > 0);
+        if (lines.length < 2) return null;
+        
+        // Verificar se parece ser uma oferta
+        const isOffer = text.includes('R$') || 
+                       text.includes('desconto') || 
+                       text.includes('promoção') || 
+                       text.includes('cupom') ||
+                       text.includes('%') ||
+                       text.toLowerCase().includes('off');
+        
+        if (!isOffer) return null;
+        
+        // Título (primeira linha)
+        let title = lines[0].trim();
+        if (title.length > 60) {
+            title = title.substring(0, 60) + '...';
+        }
+        
+        // Preço
+        let price = '';
+        const priceMatch = text.match(/R\$\s?[\d.,]+/g);
+        if (priceMatch && priceMatch.length > 0) {
+            price = priceMatch[0];
+        }
+        
+        // Loja
+        let store = 'Loja Parceira';
+        const textLower = text.toLowerCase();
+        if (textLower.includes('amazon')) store = 'Amazon';
+        else if (textLower.includes('mercado livre') || textLower.includes('ml')) store = 'Mercado Livre';
+        else if (textLower.includes('shopee')) store = 'Shopee';
+        else if (textLower.includes('aliexpress')) store = 'AliExpress';
+        else if (textLower.includes('magalu') || textLower.includes('magazine luiza')) store = 'Magazine Luiza';
+        
+        // Descrição (primeiras 3 linhas)
+        let description = lines.slice(0, 3).join(' • ');
+        if (description.length > 100) {
+            description = description.substring(0, 100) + '...';
+        }
+        
+        // Determinar se é nova (menos de 24 horas)
+        const isNew = (Date.now() - date) < 24 * 60 * 60 * 1000;
+        
+        // Calcular tempo decorrido
+        const timeAgo = getTimeAgo(date);
+        
+        // Gerar link para a mensagem no Telegram
+        let link = `https://t.me/${TELEGRAM_CHANNEL}/${messageId}`;
+        
+        return {
+            title,
+            description: description || 'Confira esta oferta exclusiva!',
+            price: price, // Pode ser string vazia
+            store,
+            link,
+            timeAgo,
+            isNew,
+            date
+        };
+    }
+
+    // Processar múltiplas mensagens
+    function processMessages(messages) {
+        return messages.map(msg => processMessage(msg.text, msg.date, msg.message_id)).filter(Boolean);
     }
 
     // Função para calcular tempo decorrido
@@ -385,7 +404,7 @@
                 <div class="col-span-3 glass-card p-8 text-center">
                     <i class="fas fa-inbox text-4xl text-slate-400 mb-4"></i>
                     <h3 class="text-xl font-bold mb-2">Nenhuma oferta encontrada</h3>
-                    <p class="text-slate-400 mb-4">Tente atualizar em alguns instantes</p>
+                    <p class="text-slate-400 mb-4">As ofertas serão carregadas em breve</p>
                     <button onclick="loadTelegramOffers(true)" 
                             class="mt-4 bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl transition-all">
                         Tentar novamente
