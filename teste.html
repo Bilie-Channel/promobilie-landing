@@ -85,138 +85,139 @@
             border-radius: 4px;
         }
         
-        /* Estilo para botões de oferta */
-        .offer-badge {
+        /* Destaque para ofertas novas */
+        .new-offer {
             position: relative;
             overflow: hidden;
         }
         
-        .offer-badge::after {
+        .new-offer::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 40px 40px 0;
+            border-color: transparent #07824b transparent transparent;
+            z-index: 1;
         }
         
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        .new-offer::after {
+            content: 'NOVO';
+            position: absolute;
+            top: 6px;
+            right: 5px;
+            transform: rotate(45deg);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 2;
         }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Status Bar -->
-    <div class="bg-gradient-to-r from-green-900/30 to-blue-900/30 border-b border-green-500/20 p-2 text-center text-xs font-medium text-green-300">
-        <i class="fas fa-circle animate-pulse mr-2"></i>
+    <!-- Barra de Status Mínima -->
+    <div class="bg-gradient-to-r from-green-900/20 to-blue-900/20 border-b border-green-500/20 p-2 text-center text-xs font-medium text-green-300">
+        <i class="fas fa-circle animate-pulse mr-1"></i>
         <span id="connection-status">Conectando ao canal @promobilie...</span>
     </div>
 
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800 px-4 py-3">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="relative">
-                    <i class="fas fa-bolt text-yellow-400 text-2xl"></i>
-                    <div class="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold">Promo<span class="text-green-400">Bilie</span></h1>
-                    <p class="text-xs text-slate-400">Ofertas em tempo real</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <a href="https://t.me/promobilie" target="_blank" 
-                   class="flex items-center space-x-2 text-slate-300 hover:text-blue-400 transition-colors">
-                    <i class="fab fa-telegram"></i>
-                    <span class="hidden sm:inline text-sm">Telegram</span>
-                </a>
-                <a href="https://facebook.com/promobilie" target="_blank"
-                   class="flex items-center space-x-2 text-slate-300 hover:text-blue-500 transition-colors">
-                    <i class="fab fa-facebook"></i>
-                    <span class="hidden sm:inline text-sm">Facebook</span>
-                </a>
-                <button onclick="loadTelegramOffers(true)" 
-                        class="flex items-center space-x-2 bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg transition-all">
-                    <i class="fas fa-sync-alt"></i>
-                    <span class="text-sm font-medium">Atualizar</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <header class="max-w-6xl mx-auto px-4 py-12 md:py-16 text-center">
-        <h1 class="text-4xl md:text-5xl font-black mb-6">
-            <span class="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
-                Ofertas Ao Vivo
-            </span>
-            <br>do Canal Promo Bilie
-        </h1>
-        
-        <p class="text-slate-300 text-lg max-w-2xl mx-auto mb-10">
-            As melhores promoções de Amazon, Mercado Livre e Shopee<br>
-            direto do nosso canal do Telegram, atualizadas em tempo real
-        </p>
-        
-        <!-- WhatsApp CTA -->
-        <div class="mb-12">
-            <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
-               class="inline-flex items-center space-x-3 whatsapp-gradient text-white font-bold py-4 px-8 rounded-xl text-lg hover:scale-105 transition-all duration-300 pulse-button">
-                <i class="fab fa-whatsapp text-xl"></i>
-                <span>ENTRAR NO CANAL VIP DO WHATSAPP</span>
-            </a>
-            <p class="text-slate-400 text-sm mt-4">
-                <i class="fas fa-bolt text-yellow-400 mr-1"></i>
-                Receba as ofertas antes de todo mundo • 100% gratuito
+    <!-- Cabeçalho Mínimo -->
+    <header class="max-w-6xl mx-auto px-4 py-8 text-center">
+        <div class="mb-6">
+            <h1 class="text-3xl md:text-4xl font-black mb-2">
+                <span class="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+                    Promo Bilie
+                </span>
+            </h1>
+            <p class="text-slate-300 text-sm md:text-base">
+                Ofertas em tempo real do canal
+                <a href="https://t.me/promobilie" target="_blank" class="text-blue-300 hover:underline">@promobilie</a>
             </p>
         </div>
         
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-4 max-w-md mx-auto mb-8">
-            <div class="glass-card p-4 text-center">
-                <div class="text-2xl font-bold text-green-400" id="offers-count">--</div>
-                <div class="text-xs text-slate-400">Ofertas Hoje</div>
-            </div>
-            <div class="glass-card p-4 text-center">
-                <div class="text-2xl font-bold text-blue-400" id="last-update-time">--:--</div>
-                <div class="text-xs text-slate-400">Última Atualização</div>
-            </div>
-            <div class="glass-card p-4 text-center">
-                <div class="text-2xl font-bold text-yellow-400" id="next-update">5:00</div>
-                <div class="text-xs text-slate-400">Próxima em (min)</div>
-            </div>
+        <!-- Botão WhatsApp (pequeno) -->
+        <div class="mb-10">
+            <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+               class="inline-flex items-center space-x-2 whatsapp-gradient text-white font-bold py-3 px-6 rounded-xl text-sm hover:scale-105 transition-all duration-300">
+                <i class="fab fa-whatsapp"></i>
+                <span>ENTRAR NO WHATSAPP</span>
+            </a>
         </div>
     </header>
 
-    <!-- SEÇÃO PRINCIPAL DE OFERTAS -->
-    <main class="max-w-6xl mx-auto px-4">
+    <!-- SEÇÃO DE OFERTAS (AGORA NO TOPO) -->
+    <main class="max-w-6xl mx-auto px-4 mb-16">
+        <!-- Título das Ofertas -->
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-2xl font-bold">
                 <i class="fab fa-telegram text-blue-400 mr-2"></i>
                 Últimas Ofertas do Canal
             </h2>
-            <div class="text-sm text-slate-400">
-                <span id="update-info">Buscando ofertas...</span>
+            <div class="flex items-center space-x-4">
+                <div class="text-sm text-slate-400">
+                    <i class="fas fa-sync-alt animate-spin mr-1"></i>
+                    <span id="update-info">Buscando ofertas...</span>
+                </div>
+                <button onclick="loadTelegramOffers(true)" 
+                        class="flex items-center space-x-2 bg-green-600 hover:bg-green-500 px-4 py-2 rounded-xl transition-all">
+                    <i class="fas fa-sync-alt"></i>
+                    <span class="text-sm font-medium">Atualizar</span>
+                </button>
             </div>
         </div>
 
         <!-- Container de Ofertas -->
-        <div id="offers-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
+        <div id="offers-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             <!-- Skeletons durante carregamento -->
-            <div class="glass-card p-6 skeleton h-48 rounded-xl"></div>
-            <div class="glass-card p-6 skeleton h-48 rounded-xl"></div>
+            <div class="glass-card p-6 skeleton h-64 rounded-xl"></div>
+            <div class="glass-card p-6 skeleton h-64 rounded-xl"></div>
+            <div class="glass-card p-6 skeleton h-64 rounded-xl"></div>
+        </div>
+
+        <!-- Stats Simples -->
+        <div class="glass-card p-6 mb-12">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-400" id="offers-count">--</div>
+                    <div class="text-xs text-slate-400">Ofertas Hoje</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-400" id="last-update-time">--:--</div>
+                    <div class="text-xs text-slate-400">Última Atualização</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-400" id="next-update">5:00</div>
+                    <div class="text-xs text-slate-400">Próxima em (min)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp CTA Principal -->
+        <div class="glass-card p-8 text-center mb-12">
+            <h3 class="text-2xl font-bold mb-4">Não perca mais nenhuma oferta!</h3>
+            <p class="text-slate-300 mb-6">
+                Entre no nosso canal VIP do WhatsApp para receber as ofertas antes de todo mundo
+            </p>
+            
+            <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
+               class="inline-flex items-center space-x-3 whatsapp-gradient text-white font-black py-4 px-8 rounded-xl text-lg hover:scale-105 transition-all duration-300 pulse-button">
+                <i class="fab fa-whatsapp text-xl"></i>
+                <span>QUERO RECEBER OFERTAS NO WHATSAPP</span>
+            </a>
+            
+            <p class="text-slate-400 text-sm mt-4">
+                <i class="fas fa-shield-alt text-green-400 mr-1"></i>
+                100% gratuito • Sem spam • Cupons verificados
+            </p>
         </div>
 
         <!-- Seção de Plataformas -->
         <div class="glass-card p-8 mb-12">
-            <h3 class="text-2xl font-bold text-center mb-8">Acesse em Todas as Plataformas</h3>
+            <h3 class="text-2xl font-bold text-center mb-8">Também disponível em:</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- WhatsApp -->
@@ -226,7 +227,7 @@
                         <i class="fab fa-whatsapp text-3xl text-white"></i>
                     </div>
                     <h4 class="text-xl font-bold mb-2">WhatsApp Channel</h4>
-                    <p class="text-slate-300 text-sm mb-4">Ofertas direto no seu WhatsApp. Receba primeiro!</p>
+                    <p class="text-slate-300 text-sm mb-4">Ofertas direto no seu WhatsApp</p>
                     <div class="text-xs text-green-400 font-semibold mt-2">
                         <i class="fas fa-check-circle mr-1"></i> Canal VIP • Ofertas Exclusivas
                     </div>
@@ -239,9 +240,9 @@
                         <i class="fab fa-telegram text-3xl text-white"></i>
                     </div>
                     <h4 class="text-xl font-bold mb-2">Telegram Channel</h4>
-                    <p class="text-slate-300 text-sm mb-4">Histórico completo • Busca avançada</p>
+                    <p class="text-slate-300 text-sm mb-4">Histórico completo de ofertas</p>
                     <div class="text-xs text-blue-400 font-semibold mt-2">
-                        <i class="fas fa-history mr-1"></i> Todas as ofertas arquivadas
+                        <i class="fas fa-history mr-1"></i> Busca avançada
                     </div>
                 </a>
                 
@@ -252,60 +253,64 @@
                         <i class="fab fa-facebook text-3xl text-white"></i>
                     </div>
                     <h4 class="text-xl font-bold mb-2">Facebook Page</h4>
-                    <p class="text-slate-300 text-sm mb-4">Comunidade ativa • Discussões</p>
+                    <p class="text-slate-300 text-sm mb-4">Comunidade ativa</p>
                     <div class="text-xs text-blue-500 font-semibold mt-2">
-                        <i class="fas fa-comments mr-1"></i> Interaja com outros membros
+                        <i class="fas fa-comments mr-1"></i> Discussões e dicas
                     </div>
                 </a>
             </div>
         </div>
 
-        <!-- CTA Final -->
-        <div class="glass-card p-8 text-center mb-12">
-            <h3 class="text-2xl md:text-3xl font-bold mb-6">
-                Não perca mais nenhuma oferta!
-                <span class="block text-lg text-slate-300 font-normal mt-2">
-                    Junte-se a milhares de pessoas que já economizam diariamente
-                </span>
-            </h3>
+        <!-- Benefícios -->
+        <div class="glass-card p-8 mb-12">
+            <h3 class="text-2xl font-bold text-center mb-8">Por que escolher o Promo Bilie?</h3>
             
-            <div class="flex flex-col sm:flex-row justify-center gap-6 mb-8">
-                <div class="flex items-center space-x-3 text-slate-300">
-                    <div class="bg-green-900/30 p-2 rounded-lg">
-                        <i class="fas fa-bolt text-green-400"></i>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center p-6">
+                    <div class="bg-green-900/30 p-4 rounded-2xl inline-block mb-4">
+                        <i class="fas fa-bolt text-3xl text-green-400"></i>
                     </div>
-                    <div class="text-left">
-                        <div class="font-semibold">Ofertas Rápidas</div>
-                        <div class="text-sm text-slate-400">Antes de esgotarem</div>
-                    </div>
+                    <h4 class="text-lg font-bold mb-2">Ofertas Rápidas</h4>
+                    <p class="text-slate-300 text-sm">Receba as promoções antes de esgotarem</p>
                 </div>
                 
-                <div class="flex items-center space-x-3 text-slate-300">
-                    <div class="bg-blue-900/30 p-2 rounded-lg">
-                        <i class="fas fa-shield-alt text-blue-400"></i>
+                <div class="text-center p-6">
+                    <div class="bg-blue-900/30 p-4 rounded-2xl inline-block mb-4">
+                        <i class="fas fa-shield-alt text-3xl text-blue-400"></i>
                     </div>
-                    <div class="text-left">
-                        <div class="font-semibold">Cupons Verificados</div>
-                        <div class="text-sm text-slate-400">Testados antes de enviar</div>
-                    </div>
+                    <h4 class="text-lg font-bold mb-2">Cupons Verificados</h4>
+                    <p class="text-slate-300 text-sm">Todos os descontos são testados antes</p>
                 </div>
                 
-                <div class="flex items-center space-x-3 text-slate-300">
-                    <div class="bg-purple-900/30 p-2 rounded-lg">
-                        <i class="fas fa-tags text-purple-400"></i>
+                <div class="text-center p-6">
+                    <div class="bg-purple-900/30 p-4 rounded-2xl inline-block mb-4">
+                        <i class="fas fa-tags text-3xl text-purple-400"></i>
                     </div>
-                    <div class="text-left">
-                        <div class="font-semibold">Todas as Lojas</div>
-                        <div class="text-sm text-slate-400">Amazon, Mercado Livre, Shopee</div>
-                    </div>
+                    <h4 class="text-lg font-bold mb-2">Multiplataforma</h4>
+                    <p class="text-slate-300 text-sm">Acesse onde preferir: WhatsApp, Telegram ou Facebook</p>
                 </div>
             </div>
+        </div>
+
+        <!-- CTA Final -->
+        <div class="glass-card p-8 text-center">
+            <h3 class="text-2xl md:text-3xl font-bold mb-6">
+                Pronto para economizar?
+                <span class="block text-lg text-slate-300 font-normal mt-2">
+                    Junte-se a milhares de pessoas que já economizam com nossas ofertas
+                </span>
+            </h3>
             
             <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
                class="inline-flex items-center space-x-3 whatsapp-gradient text-white font-bold py-4 px-8 rounded-xl text-lg hover:scale-105 transition-all duration-300">
                 <i class="fab fa-whatsapp text-xl"></i>
                 <span>COMEÇAR A ECONOMIZAR AGORA</span>
             </a>
+            
+            <p class="text-slate-400 text-sm mt-4">
+                <i class="fas fa-lock text-green-400 mr-1"></i>
+                100% seguro • Sem compartilhamento de dados • Cancelamento a qualquer momento
+            </p>
         </div>
     </main>
 
@@ -370,7 +375,7 @@
             };
             
             connectionStatus.className = colors[type];
-            connectionStatus.innerHTML = `<i class="fas fa-circle ${type === 'success' ? 'animate-pulse' : ''} mr-2"></i>${text}`;
+            connectionStatus.innerHTML = `<i class="fas fa-circle ${type === 'success' ? 'animate-pulse' : ''} mr-1"></i>${text}`;
         }
 
         // Função para formatar hora
@@ -392,93 +397,158 @@
             return `${Math.floor(diff / 86400)} d atrás`;
         }
 
-        // Função para processar mensagens do Telegram
+        // Função para processar mensagens do Telegram - VERSÃO MELHORADA
         function processTelegramMessages(messages) {
-            return messages
-                .filter(msg => msg.text && msg.text.trim().length > 0)
+            // Primeiro, filtrar apenas mensagens com texto
+            const textMessages = messages
+                .filter(msg => {
+                    const text = msg.text || msg.caption;
+                    return text && text.trim().length > 10;
+                })
                 .map(msg => {
-                    const text = msg.text;
-                    const lines = text.split('\n').filter(line => line.trim().length > 0);
+                    const text = (msg.text || msg.caption).trim();
+                    const date = msg.date * 1000;
                     
                     // Extrair informações da oferta
-                    let title = lines[0] || 'Nova Oferta';
-                    let price = '';
-                    let store = '';
-                    let link = '';
-                    let description = '';
+                    const lines = text.split('\n').filter(line => line.trim().length > 0);
                     
-                    // Procurar preço
-                    for (const line of lines) {
-                        if (line.includes('R$') || line.includes('por') || line.includes('POR')) {
-                            const priceMatch = line.match(/R\$\s?[\d.,]+/g);
-                            if (priceMatch) price = priceMatch[0];
-                        }
-                        
-                        if (line.includes('Amazon')) store = 'Amazon';
-                        else if (line.includes('Mercado Livre') || line.includes('ML')) store = 'Mercado Livre';
-                        else if (line.includes('Shopee')) store = 'Shopee';
-                        
-                        if (line.includes('http')) {
-                            const urlMatch = line.match(/https?:\/\/[^\s]+/g);
-                            if (urlMatch) link = urlMatch[0];
-                        }
+                    // Identificar se é uma oferta (contém palavras-chave)
+                    const isOffer = text.includes('R$') || 
+                                   text.includes('desconto') || 
+                                   text.includes('promoção') || 
+                                   text.includes('cupom') ||
+                                   text.includes('%') ||
+                                   text.includes('off') ||
+                                   text.includes('OFF');
+                    
+                    if (!isOffer && lines.length < 2) return null;
+                    
+                    // Título (primeira linha ou primeira parte)
+                    let title = lines[0] || 'Nova Oferta';
+                    if (title.length > 50) {
+                        title = title.substring(0, 50) + '...';
+                    }
+                    
+                    // Preço
+                    let price = '';
+                    const priceMatch = text.match(/R\$\s?[\d.,]+/g);
+                    if (priceMatch && priceMatch.length > 0) {
+                        price = priceMatch[0];
+                    }
+                    
+                    // Loja
+                    let store = 'Loja Parceira';
+                    const textLower = text.toLowerCase();
+                    if (textLower.includes('amazon')) store = 'Amazon';
+                    else if (textLower.includes('mercado livre') || textLower.includes('ml')) store = 'Mercado Livre';
+                    else if (textLower.includes('shopee')) store = 'Shopee';
+                    else if (textLower.includes('aliexpress')) store = 'AliExpress';
+                    else if (textLower.includes('magalu')) store = 'Magazine Luiza';
+                    
+                    // Link
+                    let link = '';
+                    const urlMatch = text.match(/https?:\/\/[^\s]+/g);
+                    if (urlMatch && urlMatch.length > 0) {
+                        link = urlMatch[0];
+                    } else {
+                        link = `https://t.me/${TELEGRAM_CHANNEL.replace('@', '')}`;
                     }
                     
                     // Descrição (primeiras 3 linhas)
-                    description = lines.slice(0, 3).join(' • ');
+                    let description = lines.slice(0, 3).join(' • ');
                     if (description.length > 100) description = description.substring(0, 100) + '...';
                     
+                    // Determinar se é nova (menos de 1 hora)
+                    const isNew = (Date.now() - date) < 3600000;
+                    
                     return {
-                        title: title.substring(0, 60),
+                        title,
                         description,
                         price: price || 'Preço especial',
-                        store: store || 'Loja parceira',
-                        link: link || `https://t.me/${TELEGRAM_CHANNEL.replace('@', '')}`,
-                        timestamp: msg.date * 1000,
-                        timeAgo: getTimeAgo(msg.date * 1000)
+                        store,
+                        link,
+                        timestamp: date,
+                        timeAgo: getTimeAgo(date),
+                        isNew,
+                        fullText: text
                     };
                 })
-                .slice(0, 6); // Limitar a 6 ofertas
+                .filter(msg => msg !== null); // Remover nulls
+                
+            // Ordenar por data (mais recente primeiro)
+            textMessages.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // Pegar apenas as 6 mais recentes
+            return textMessages.slice(0, 6);
         }
 
-        // Função para buscar ofertas do Telegram
+        // Função para buscar ofertas do Telegram - VERSÃO ATUALIZADA
         async function loadTelegramOffers(forceUpdate = false) {
             try {
-                updateConnectionStatus('Conectando ao canal @promobilie...', 'info');
-                updateInfo.textContent = 'Buscando ofertas...';
+                updateConnectionStatus('Buscando ofertas mais recentes...', 'info');
+                updateInfo.textContent = 'Buscando ofertas mais recentes...';
                 
-                // Usar CORS proxy para acessar a API do Telegram
-                const corsProxy = 'https://corsproxy.io/?';
-                const apiUrl = `${corsProxy}https://api.telegram.org/bot7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI/getChatHistory?chat_id=@promobilie&limit=20`;
+                // Usar CORS proxy
+                const corsProxy = 'https://api.allorigins.win/get?url=';
                 
-                const response = await fetch(apiUrl);
+                // Primeiro, tentar pegar as últimas mensagens diretamente
+                // URL para pegar as últimas 20 mensagens do canal
+                const encodedUrl = encodeURIComponent(
+                    `https://api.telegram.org/bot7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI/getUpdates?offset=-20&limit=20&timeout=1`
+                );
+                
+                const response = await fetch(`${corsProxy}${encodedUrl}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
                 
                 const data = await response.json();
+                const telegramData = JSON.parse(data.contents);
                 
-                if (data.ok && data.result) {
-                    const offers = processTelegramMessages(data.result);
+                if (telegramData.ok && telegramData.result) {
+                    // Filtrar apenas mensagens do canal @promobilie
+                    const channelMessages = telegramData.result
+                        .filter(update => {
+                            // Verificar se é uma mensagem do canal
+                            const channelPost = update.channel_post;
+                            return channelPost && 
+                                   channelPost.chat && 
+                                   channelPost.chat.username === 'promobilie' &&
+                                   (channelPost.text || channelPost.caption);
+                        })
+                        .map(update => {
+                            const post = update.channel_post;
+                            return {
+                                text: post.text || post.caption,
+                                date: post.date
+                            };
+                        });
                     
-                    if (offers.length > 0) {
-                        updateConnectionStatus(`✅ ${offers.length} ofertas encontradas no canal`, 'success');
-                        updateInfo.textContent = `${offers.length} ofertas carregadas`;
-                        offersCount.textContent = offers.length;
-                        renderOffers(offers);
+                    if (channelMessages.length > 0) {
+                        // Processar mensagens
+                        const offers = processTelegramMessages(channelMessages);
+                        
+                        if (offers.length > 0) {
+                            updateConnectionStatus(`✅ ${offers.length} ofertas recentes encontradas`, 'success');
+                            updateInfo.textContent = `${offers.length} ofertas carregadas`;
+                            offersCount.textContent = offers.length;
+                            renderOffers(offers);
+                        } else {
+                            // Se não encontrou ofertas, tentar método alternativo
+                            await tryAlternativeMethod();
+                        }
                     } else {
-                        throw new Error('Nenhuma oferta encontrada');
+                        // Se não encontrou mensagens do canal, tentar método alternativo
+                        await tryAlternativeMethod();
                     }
                 } else {
                     throw new Error('Resposta inválida da API');
                 }
                 
             } catch (error) {
-                console.warn('Erro ao buscar ofertas do Telegram:', error);
-                
-                // Fallback: buscar da página web do Telegram
-                await loadFromTelegramWeb();
+                console.warn('Erro ao buscar ofertas:', error);
+                await tryAlternativeMethod();
             } finally {
                 // Atualizar tempo
                 const now = new Date();
@@ -489,99 +559,138 @@
             }
         }
 
-        // Fallback: Buscar da página web do Telegram
-        async function loadFromTelegramWeb() {
+        // Método alternativo: Buscar da web do Telegram
+        async function tryAlternativeMethod() {
             try {
                 updateConnectionStatus('Usando método alternativo...', 'warning');
                 
-                const corsProxy = 'https://corsproxy.io/?';
-                const webUrl = `${corsProxy}https://t.me/s/promobilie`;
+                // Tentar buscar da página web do Telegram
+                const corsProxy = 'https://api.allorigins.win/get?url=';
+                const encodedUrl = encodeURIComponent('https://t.me/s/promobilie');
                 
-                const response = await fetch(webUrl);
-                const html = await response.text();
+                const response = await fetch(`${corsProxy}${encodedUrl}`);
                 
-                // Parse simples do HTML para extrair mensagens
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // Tentar encontrar mensagens (esta é uma abordagem simplificada)
-                const messageElements = doc.querySelectorAll('.tgme_widget_message_text');
-                const offers = [];
-                
-                messageElements.forEach((element, index) => {
-                    if (index < 6) { // Limitar a 6 ofertas
-                        const text = element.textContent.trim();
-                        if (text && text.length > 10) {
-                            offers.push({
-                                title: `Oferta #${index + 1}`,
-                                description: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
-                                price: 'Preço especial',
-                                store: 'Loja parceira',
-                                link: `https://t.me/promobilie`,
-                                timestamp: Date.now() - (index * 3600000),
-                                timeAgo: getTimeAgo(Date.now() - (index * 3600000))
-                            });
-                        }
-                    }
-                });
-                
-                if (offers.length > 0) {
-                    updateConnectionStatus(`⚠️ ${offers.length} ofertas carregadas (modo leitura)`, 'warning');
-                    updateInfo.textContent = `${offers.length} ofertas (modo leitura)`;
-                    offersCount.textContent = offers.length;
-                    renderOffers(offers);
-                } else {
-                    throw new Error('Nenhuma oferta encontrada');
+                if (!response.ok) {
+                    throw new Error('Falha no método alternativo');
                 }
+                
+                const data = await response.json();
+                const html = data.contents;
+                
+                // Extrair mensagens do HTML
+                const messages = extractMessagesFromHTML(html);
+                
+                if (messages.length > 0) {
+                    const offers = processTelegramMessages(messages);
+                    
+                    if (offers.length > 0) {
+                        updateConnectionStatus(`⚠️ ${offers.length} ofertas (modo leitura)`, 'warning');
+                        updateInfo.textContent = `${offers.length} ofertas (web)`;
+                        offersCount.textContent = offers.length;
+                        renderOffers(offers);
+                        return;
+                    }
+                }
+                
+                throw new Error('Nenhuma oferta encontrada');
                 
             } catch (error) {
                 console.warn('Erro no método alternativo:', error);
-                
-                // Último fallback: ofertas de exemplo
                 loadExampleOffers();
             }
+        }
+
+        // Extrair mensagens do HTML da página do Telegram
+        function extractMessagesFromHTML(html) {
+            const messages = [];
+            
+            try {
+                // Tentar encontrar mensagens no HTML
+                const messageRegex = /<div class="tgme_widget_message_text"[^>]*>([\s\S]*?)<\/div>/g;
+                let match;
+                
+                while ((match = messageRegex.exec(html)) !== null && messages.length < 10) {
+                    const text = match[1]
+                        .replace(/<[^>]*>/g, ' ') // Remover tags HTML
+                        .replace(/\s+/g, ' ') // Remover espaços extras
+                        .trim();
+                    
+                    if (text.length > 10) {
+                        messages.push({
+                            text: text,
+                            date: Math.floor(Date.now() / 1000) - (messages.length * 3600) // Simular timestamps
+                        });
+                    }
+                }
+            } catch (error) {
+                console.warn('Erro ao extrair mensagens do HTML:', error);
+            }
+            
+            return messages;
         }
 
         // Último fallback: Ofertas de exemplo
         function loadExampleOffers() {
             const exampleOffers = [
                 {
-                    title: "🔥 PROMOÇÃO RELÂMPAGO",
-                    description: "Smart TV 50'' 4K UHD com preço especial por tempo limitado",
+                    title: "🔥 PROMOÇÃO RELÂMPAGO - AMAZON",
+                    description: "Smart TV 50'' 4K UHD com preço especial por tempo limitado. Aproveite!",
                     price: "R$ 1.799",
                     store: "Amazon",
                     link: "https://t.me/promobilie",
-                    timeAgo: "15 min atrás"
+                    timeAgo: "15 min atrás",
+                    isNew: true
                 },
                 {
-                    title: "🎯 OFERTA EXCLUSIVA",
-                    description: "Notebook Gamer com 30% de desconto + frete grátis",
+                    title: "🎯 OFERTA EXCLUSIVA - MERCADO LIVRE",
+                    description: "Notebook Gamer com 30% de desconto + frete grátis para todo Brasil",
                     price: "R$ 3.299",
                     store: "Mercado Livre",
                     link: "https://t.me/promobilie",
-                    timeAgo: "1 h atrás"
+                    timeAgo: "1 h atrás",
+                    isNew: true
                 },
                 {
-                    title: "📱 SUPER DESCONTO",
-                    description: "iPhone 14 com cashback especial e parcelamento sem juros",
+                    title: "📱 SUPER DESCONTO - SHOPEE",
+                    description: "iPhone 14 com cashback especial e parcelamento sem juros em 12x",
                     price: "R$ 4.499",
                     store: "Shopee",
                     link: "https://t.me/promobilie",
-                    timeAgo: "2 h atrás"
+                    timeAgo: "2 h atrás",
+                    isNew: false
                 },
                 {
-                    title: "💎 OFERTA IMPERDÍVEL",
-                    description: "Fone de Ouvido Bluetooth com cancelamento de ruído ativo",
+                    title: "💎 OFERTA IMPERDÍVEL - AMAZON",
+                    description: "Fone de Ouvido Bluetooth com cancelamento de ruído ativo por preço especial",
                     price: "R$ 199",
                     store: "Amazon",
                     link: "https://t.me/promobilie",
-                    timeAgo: "3 h atrás"
+                    timeAgo: "3 h atrás",
+                    isNew: false
+                },
+                {
+                    title: "🛒 DESCONTO VERIFICADO - MERCADO LIVRE",
+                    description: "Smartwatch com GPS e monitor cardíaco com 40% de desconto hoje",
+                    price: "R$ 299",
+                    store: "Mercado Livre",
+                    link: "https://t.me/promobilie",
+                    timeAgo: "4 h atrás",
+                    isNew: false
+                },
+                {
+                    title: "🎁 PROMOÇÃO DO DIA - SHOPEE",
+                    description: "Kit Ferramentas Profissional com mais de 100 peças e frete grátis",
+                    price: "R$ 149",
+                    store: "Shopee",
+                    link: "https://t.me/promobilie",
+                    timeAgo: "5 h atrás",
+                    isNew: false
                 }
             ];
             
-            updateConnectionStatus("📡 Modo demonstração - Entre no canal para ver ofertas reais", "warning");
-            updateInfo.textContent = "4 ofertas de demonstração";
-            offersCount.textContent = "4";
+            updateConnectionStatus("📡 Modo demonstração - Entre no canal para ofertas reais", "warning");
+            updateInfo.textContent = "6 ofertas de demonstração";
+            offersCount.textContent = "6";
             renderOffers(exampleOffers);
         }
 
@@ -589,55 +698,80 @@
         function renderOffers(offers) {
             offersContainer.innerHTML = '';
             
+            if (offers.length === 0) {
+                offersContainer.innerHTML = `
+                    <div class="col-span-3 glass-card p-8 text-center">
+                        <i class="fas fa-inbox text-4xl text-slate-400 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Nenhuma oferta encontrada</h3>
+                        <p class="text-slate-400 mb-4">As ofertas serão carregadas em breve</p>
+                        <a href="https://t.me/promobilie" target="_blank"
+                           class="inline-flex items-center space-x-2 telegram-gradient text-white font-semibold py-2 px-4 rounded-xl">
+                            <i class="fab fa-telegram"></i>
+                            <span>Ver canal completo</span>
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
             offers.forEach((offer, index) => {
                 const card = document.createElement('div');
-                card.className = 'glass-card p-6 animate-fadeIn';
+                card.className = `glass-card p-6 animate-fadeIn ${offer.isNew ? 'new-offer' : ''}`;
                 card.style.animationDelay = `${index * 0.1}s`;
                 
                 // Cor baseada na loja
-                let storeColor = 'border-green-500/30';
+                let storeColor = 'bg-green-900/30 text-green-300';
                 let storeIcon = 'fas fa-store';
                 
                 if (offer.store === 'Amazon') {
-                    storeColor = 'border-yellow-500/30';
+                    storeColor = 'bg-yellow-900/30 text-yellow-300';
                     storeIcon = 'fab fa-amazon';
                 } else if (offer.store === 'Mercado Livre') {
-                    storeColor = 'border-blue-500/30';
+                    storeColor = 'bg-blue-900/30 text-blue-300';
                     storeIcon = 'fas fa-shopping-cart';
                 } else if (offer.store === 'Shopee') {
-                    storeColor = 'border-orange-500/30';
+                    storeColor = 'bg-orange-900/30 text-orange-300';
                     storeIcon = 'fas fa-shopping-bag';
+                } else if (offer.store === 'AliExpress') {
+                    storeColor = 'bg-red-900/30 text-red-300';
+                    storeIcon = 'fas fa-box';
+                } else if (offer.store === 'Magazine Luiza') {
+                    storeColor = 'bg-purple-900/30 text-purple-300';
+                    storeIcon = 'fas fa-store-alt';
                 }
                 
                 card.innerHTML = `
                     <div class="flex flex-col h-full">
                         <div class="flex justify-between items-start mb-4">
                             <div>
-                                <div class="flex items-center space-x-2 mb-2">
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-green-900/30 to-green-700/30 text-green-300 border ${storeColor}">
+                                <div class="flex items-center space-x-2 mb-3">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold ${storeColor}">
                                         <i class="${storeIcon} mr-1"></i>${offer.store}
                                     </span>
-                                    <span class="text-xs text-slate-400">${offer.timeAgo}</span>
+                                    <span class="text-xs text-slate-400">
+                                        <i class="far fa-clock mr-1"></i>${offer.timeAgo}
+                                    </span>
+                                    ${offer.isNew ? '<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-900/30 text-green-300">NOVO</span>' : ''}
                                 </div>
-                                <h3 class="text-lg font-bold text-white mb-2">${offer.title}</h3>
+                                <h3 class="text-lg font-bold text-white mb-3 line-clamp-2">${offer.title}</h3>
                             </div>
                         </div>
                         
-                        <p class="text-slate-300 text-sm mb-4 flex-grow">${offer.description}</p>
+                        <p class="text-slate-300 text-sm mb-4 flex-grow line-clamp-3">${offer.description}</p>
                         
                         <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-800">
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-baseline space-x-2">
                                 <span class="text-2xl font-black text-green-400">${offer.price}</span>
-                                <span class="text-xs text-slate-400">Preço especial</span>
+                                ${offer.isNew ? '<span class="text-xs text-green-300 font-bold">HOJE!</span>' : ''}
                             </div>
                             
-                            <div class="flex space-x-2">
+                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                 <a href="${offer.link}" target="_blank"
-                                   class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                   class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors text-center">
                                     Ver Oferta
                                 </a>
                                 <a href="https://whatsapp.com/channel/0029Vb7EcLbFMqrdYt0KNM0Y" target="_blank"
-                                   class="px-4 py-2 whatsapp-gradient text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+                                   class="px-4 py-2 whatsapp-gradient text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity text-center">
                                     <i class="fab fa-whatsapp mr-1"></i>WhatsApp
                                 </a>
                             </div>
