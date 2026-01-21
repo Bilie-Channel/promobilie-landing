@@ -83,6 +83,11 @@
         .social-section {
             padding: 40px 0;
             text-align: center;
+            background: white;
+            margin: 20px auto;
+            max-width: 800px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
         }
         
         .section-title {
@@ -201,7 +206,6 @@
         
         .offers-section {
             padding: 40px 0 60px;
-            background-color: white;
         }
         
         .offers-grid {
@@ -380,34 +384,6 @@
                 margin-bottom: 20px;
             }
         }
-        
-        .method-selector {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .method-btn {
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        
-        .method-btn.active {
-            background: var(--secondary);
-            color: white;
-            border-color: var(--secondary);
-        }
-        
-        .method-btn:hover:not(.active) {
-            background: #e9ecef;
-        }
     </style>
 </head>
 <body>
@@ -421,7 +397,30 @@
         </div>
     </header>
 
-    <!-- Seção de Redes Sociais -->
+    <!-- Seção de Últimas Ofertas -->
+    <section class="offers-section">
+        <div class="container">
+            <h2 class="section-title">Últimas Ofertas</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: var(--gray); max-width: 800px; margin: 0 auto 30px;">
+                Confira as últimas ofertas publicadas no nosso canal do Telegram. Atualizamos diariamente com novas promoções!
+            </p>
+            
+            <div class="offers-grid" id="offers-container">
+                <!-- Ofertas serão carregadas aqui -->
+            </div>
+            
+            <div class="refresh-btn-container">
+                <button onclick="loadOffers()" class="btn btn-telegram" id="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Atualizar Ofertas
+                </button>
+                <p style="margin-top: 10px; font-size: 0.9em; color: var(--gray);">
+                    Ofertas carregadas do canal: <strong>@promobilie</strong>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção de Redes Sociais (Agora abaixo das ofertas) -->
     <section class="social-section">
         <div class="container">
             <h2 class="section-title">Participe dos Nossos Canais</h2>
@@ -469,42 +468,6 @@
         </div>
     </section>
 
-    <!-- Seção de Últimas Ofertas -->
-    <section class="offers-section">
-        <div class="container">
-            <h2 class="section-title">Últimas Ofertas</h2>
-            <p style="text-align: center; margin-bottom: 20px; color: var(--gray); max-width: 800px; margin: 0 auto 30px;">
-                Confira as últimas ofertas publicadas no nosso canal do Telegram. Atualizamos diariamente com novas promoções!
-            </p>
-            
-            <!-- Seletor de Método -->
-            <div class="method-selector">
-                <button class="method-btn active" onclick="setMethod('scraping')" id="btn-scraping">
-                    <i class="fas fa-globe"></i> Método Web (Recomendado)
-                </button>
-                <button class="method-btn" onclick="setMethod('api')" id="btn-api">
-                    <i class="fas fa-code"></i> Método API (Bot)
-                </button>
-                <button class="method-btn" onclick="setMethod('sample')" id="btn-sample">
-                    <i class="fas fa-eye"></i> Ver Exemplo
-                </button>
-            </div>
-            
-            <div class="offers-grid" id="offers-container">
-                <!-- Ofertas serão carregadas aqui -->
-            </div>
-            
-            <div class="refresh-btn-container">
-                <button onclick="loadOffers()" class="btn btn-telegram" id="refresh-btn">
-                    <i class="fas fa-sync-alt"></i> Carregar Ofertas
-                </button>
-                <p style="margin-top: 10px; font-size: 0.9em; color: var(--gray);">
-                    Método atual: <span id="current-method">Web Scraping</span>
-                </p>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -536,32 +499,8 @@
         // Configurações
         const config = {
             telegramChannel: 'promobilie',
-            limit: 6,
-            currentMethod: 'scraping', // 'scraping', 'api', ou 'sample'
-            telegramBotToken: '7735068192:AAG7DFrOE3G8MK4xwO_WX1atjlXe_9D4RfI' // Para método API
+            limit: 6
         };
-        
-        // Função para definir o método
-        function setMethod(method) {
-            config.currentMethod = method;
-            
-            // Atualizar botões
-            document.getElementById('btn-scraping').classList.remove('active');
-            document.getElementById('btn-api').classList.remove('active');
-            document.getElementById('btn-sample').classList.remove('active');
-            document.getElementById(`btn-${method}`).classList.add('active');
-            
-            // Atualizar texto
-            const methodNames = {
-                scraping: 'Web Scraping',
-                api: 'API do Telegram',
-                sample: 'Exemplo'
-            };
-            document.getElementById('current-method').textContent = methodNames[method];
-            
-            // Recarregar ofertas
-            loadOffers();
-        }
         
         // Função principal para carregar ofertas
         async function loadOffers() {
@@ -572,7 +511,7 @@
             container.innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Carregando ofertas via ${config.currentMethod === 'scraping' ? 'Web Scraping' : config.currentMethod === 'api' ? 'API do Telegram' : 'Exemplo'}...</p>
+                    <p>Carregando ofertas do canal @${config.telegramChannel}...</p>
                 </div>
             `;
             
@@ -581,19 +520,7 @@
             refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
             
             try {
-                let messages = [];
-                
-                switch(config.currentMethod) {
-                    case 'scraping':
-                        messages = await loadViaWebScraping();
-                        break;
-                    case 'api':
-                        messages = await loadViaTelegramAPI();
-                        break;
-                    case 'sample':
-                        messages = getSampleMessages();
-                        break;
-                }
+                const messages = await loadViaWebScraping();
                 
                 if (messages && messages.length > 0) {
                     renderOffers(messages.slice(0, config.limit));
@@ -607,12 +534,12 @@
             } finally {
                 // Reabilitar botão
                 refreshBtn.disabled = false;
-                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Carregar Ofertas';
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Ofertas';
             }
         }
         
         // =============================================
-        // MÉTODO 1: WEB SCRAPING (RECOMENDADO)
+        // WEB SCRAPING (ÚNICO MÉTODO)
         // =============================================
         async function loadViaWebScraping() {
             try {
@@ -708,172 +635,8 @@
                 
             } catch (error) {
                 console.error('Erro no web scraping:', error);
-                throw new Error(`Falha no web scraping: ${error.message}`);
+                throw new Error(`Falha ao carregar ofertas: ${error.message}`);
             }
-        }
-        
-        // =============================================
-        // MÉTODO 2: API DO TELEGRAM (BOT)
-        // =============================================
-        async function loadViaTelegramAPI() {
-            if (config.telegramBotToken === 'SEU_TOKEN_AQUI') {
-                throw new Error('Configure o token do bot primeiro');
-            }
-            
-            try {
-                // Método 1: Tentar getUpdates primeiro
-                let apiUrl = `https://api.telegram.org/bot${config.telegramBotToken}/getUpdates`;
-                apiUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
-                
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (!data.ok) {
-                    throw new Error(data.description || 'Erro na API do Telegram');
-                }
-                
-                // Processar mensagens
-                const messages = [];
-                const updates = data.result || [];
-                
-                // Filtrar apenas mensagens do canal
-                updates.forEach(update => {
-                    const channelPost = update.channel_post;
-                    
-                    if (channelPost && channelPost.chat && 
-                        channelPost.chat.username === config.telegramChannel) {
-                        
-                        const text = channelPost.text || channelPost.caption || '';
-                        
-                        if (text) {
-                            const date = new Date(channelPost.date * 1000);
-                            const formattedDate = date.toLocaleDateString('pt-BR', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                            
-                            const messageId = channelPost.message_id;
-                            const link = `https://t.me/${config.telegramChannel}/${messageId}`;
-                            
-                            messages.push({
-                                id: messageId,
-                                text: text,
-                                date: formattedDate,
-                                rawDate: channelPost.date,
-                                link: link,
-                                hasImage: !!(channelPost.photo || channelPost.document)
-                            });
-                        }
-                    }
-                });
-                
-                // Ordenar por data (mais recente primeiro)
-                messages.sort((a, b) => b.rawDate - a.rawDate);
-                
-                if (messages.length === 0) {
-                    throw new Error('O bot não tem acesso ao histórico do canal');
-                }
-                
-                return messages;
-                
-            } catch (error) {
-                console.error('Erro na API do Telegram:', error);
-                throw new Error(`API do Telegram: ${error.message}`);
-            }
-        }
-        
-        // =============================================
-        // MÉTODO 3: MENSAGENS DE EXEMPLO
-        // =============================================
-        function getSampleMessages() {
-            return [
-                {
-                    id: 1,
-                    text: "🔥 OFERTA RELÂMPAGO: Smartphone Xiaomi com 45% OFF! Modelo topo de linha, 8GB RAM, 256GB. Apenas R$ 1.299 à vista. Corre que é por tempo limitado! 📱",
-                    date: new Date().toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    link: "https://t.me/promobilie",
-                    hasImage: true
-                },
-                {
-                    id: 2,
-                    text: "🎮 PROMOÇÃO: PlayStation 5 + Controle Extra + 3 Jogos Digitais por apenas R$ 3.799! Entrega grátis para todo Brasil. Estoque limitado!",
-                    date: new Date(Date.now() - 3600000).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    link: "https://t.me/promobilie",
-                    hasImage: true
-                },
-                {
-                    id: 3,
-                    text: "💻 NOTEBOOK GAMER: Acer Nitro 5 com RTX 3050, i7, 16GB RAM por R$ 4.199! Apenas 8 unidades disponíveis. Não perca essa chance!",
-                    date: new Date(Date.now() - 7200000).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    link: "https://t.me/promobilie",
-                    hasImage: false
-                },
-                {
-                    id: 4,
-                    text: "🛒 SUPERMERCADO: Cupom 35% OFF em compras acima de R$ 250! Use o código: PROMOBILIE35. Válido até amanhã à meia-noite!",
-                    date: new Date(Date.now() - 10800000).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    link: "https://t.me/promobilie",
-                    hasImage: false
-                },
-                {
-                    id: 5,
-                    text: "✈️ VIAGEM: Passagens aéreas com 65% OFF para Florianópolis, Rio e Bahia! Promoção válida para embarque até dezembro. Reserve já!",
-                    date: new Date(Date.now() - 14400000).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    link: "https://t.me/promobilie",
-                    hasImage: true
-                },
-                {
-                    id: 6,
-                    text: "🏠 ELETRODOMÉSTICOS: Geladeira French Door 520L por R$ 2.899! 12x sem juros + frete grátis + 2 anos de garantia. Oferta especial!",
-                    date: new Date(Date.now() - 18000000).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    link: "https://t.me/promobilie",
-                    hasImage: true
-                }
-            ];
         }
         
         // =============================================
@@ -929,7 +692,7 @@
                 <div class="empty-state">
                     <i class="fas fa-inbox"></i>
                     <h3>Nenhuma oferta encontrada</h3>
-                    <p>Tente mudar o método de carregamento ou verifique se o canal está público.</p>
+                    <p>Tente novamente mais tarde ou verifique se o canal está público.</p>
                     <div style="margin-top: 20px;">
                         <a href="https://t.me/${config.telegramChannel}" target="_blank" class="btn btn-telegram">
                             <i class="fab fa-telegram"></i> Acessar Canal Diretamente
@@ -947,12 +710,12 @@
                     <h3>Erro ao carregar ofertas</h3>
                     <p>${message || 'Ocorreu um erro inesperado.'}</p>
                     <div style="margin-top: 20px;">
-                        <p><strong>Tente:</strong></p>
-                        <ol style="text-align: left; max-width: 500px; margin: 10px auto;">
-                            <li>Usar o método "Web Scraping" (recomendado)</li>
+                        <p><strong>Soluções:</strong></p>
+                        <ul style="text-align: left; max-width: 500px; margin: 10px auto; padding-left: 20px;">
                             <li>Verificar se o canal é público</li>
                             <li>Recarregar a página</li>
-                        </ol>
+                            <li>Tentar novamente em alguns minutos</li>
+                        </ul>
                     </div>
                 </div>
             `;
